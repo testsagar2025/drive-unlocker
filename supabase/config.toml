@@ -1,0 +1,7 @@
+project_id = "hczamaqyyreqyntleewi"
+
+[functions.verify-screenshot]
+verify_jwt = false
+
+[functions.get-drive-link]
+verify_jwt = false

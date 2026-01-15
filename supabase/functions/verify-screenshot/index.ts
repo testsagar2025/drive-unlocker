@@ -28,15 +28,18 @@ serve(async (req) => {
 
     // Define verification prompts for each step
     const verificationPrompts: Record<number, string> = {
-      1: `Analyze this screenshot and determine if it shows a successful registration or sign-up completion on an affiliate/community platform (like Allen Info or similar educational platform).
+      1: `Analyze this screenshot and determine if it shows a successful registration completion on the ALLEN educational platform or similar affiliate platform.
 
-Look for these indicators of successful registration:
+Look for these SPECIFIC indicators of successful ALLEN registration:
+- "Thank you for sharing your details" message
+- "Our student advisor will reach out to you" message  
+- Blue checkmark or success icon with celebration graphics
+- ALLEN logo visible with confirmation content
 - "Registration successful" or "Welcome" message
-- Confirmation page or dashboard after signup
-- "Thank you for registering" or similar success text
-- User profile or account page after registration
-- OTP verification success
-- "Registration complete" or "Account created" message
+- Confirmation page showing the user completed signup
+- Any success indicator after form submission
+
+The screenshot should show a SUCCESS/CONFIRMATION screen, NOT the registration form itself.
 
 Respond with ONLY a JSON object (no markdown, no code blocks):
 {"verified": true, "reason": "Description of what you found"} 
@@ -47,11 +50,13 @@ OR
 
 Look for these indicators:
 - WhatsApp group chat interface visible
-- Group name visible in the chat
-- "You joined using this group's invite link" message
-- Being inside a group chat (not just the invite page)
+- Group name visible in the chat header
+- "You joined using this group's invite link" system message
+- Being inside a group chat (not just the invite/join page)
 - Messages from other group members visible
-- Group info showing membership
+- Group info showing membership status
+
+The screenshot must show the user is INSIDE the group, not on the join invitation page.
 
 Respond with ONLY a JSON object (no markdown, no code blocks):
 {"verified": true, "reason": "Description of what you found"}

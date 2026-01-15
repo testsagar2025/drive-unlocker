@@ -14,12 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string | null
+          page_path: string
+          session_token: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          page_path?: string
+          session_token?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          page_path?: string
+          session_token?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       user_sessions: {
         Row: {
           created_at: string
           drive_link_accessed: boolean
           drive_link_accessed_at: string | null
           id: string
+          registration_completed: boolean | null
+          registration_completed_at: string | null
           session_token: string
           step1_screenshot_url: string | null
           step1_verified: boolean
@@ -27,6 +56,9 @@ export type Database = {
           step2_screenshot_url: string | null
           step2_verified: boolean
           step2_verified_at: string | null
+          student_class: string | null
+          student_mobile: string | null
+          student_name: string | null
           updated_at: string
         }
         Insert: {
@@ -34,6 +66,8 @@ export type Database = {
           drive_link_accessed?: boolean
           drive_link_accessed_at?: string | null
           id?: string
+          registration_completed?: boolean | null
+          registration_completed_at?: string | null
           session_token: string
           step1_screenshot_url?: string | null
           step1_verified?: boolean
@@ -41,6 +75,9 @@ export type Database = {
           step2_screenshot_url?: string | null
           step2_verified?: boolean
           step2_verified_at?: string | null
+          student_class?: string | null
+          student_mobile?: string | null
+          student_name?: string | null
           updated_at?: string
         }
         Update: {
@@ -48,6 +85,8 @@ export type Database = {
           drive_link_accessed?: boolean
           drive_link_accessed_at?: string | null
           id?: string
+          registration_completed?: boolean | null
+          registration_completed_at?: string | null
           session_token?: string
           step1_screenshot_url?: string | null
           step1_verified?: boolean
@@ -55,6 +94,9 @@ export type Database = {
           step2_screenshot_url?: string | null
           step2_verified?: boolean
           step2_verified_at?: string | null
+          student_class?: string | null
+          student_mobile?: string | null
+          student_name?: string | null
           updated_at?: string
         }
         Relationships: []

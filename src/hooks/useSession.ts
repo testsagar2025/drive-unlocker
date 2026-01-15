@@ -7,12 +7,28 @@ interface SessionData {
   step1_verified: boolean;
   step2_verified: boolean;
   drive_link_accessed: boolean;
+  student_name: string | null;
+  student_class: string | null;
+  student_mobile: string | null;
+  registration_completed: boolean;
 }
 
 export function useSession() {
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const trackPageView = async (sessionToken: string) => {
+    try {
+      await supabase.from("page_views").insert({
+        page_path: window.location.pathname,
+        session_token: sessionToken,
+        user_agent: navigator.userAgent,
+      });
+    } catch (err) {
+      console.error("Failed to track page view:", err);
+    }
+  };
 
   const getOrCreateSession = async () => {
     try {
@@ -29,6 +45,7 @@ export function useSession() {
 
         if (data && !fetchError) {
           setSession(data as SessionData);
+          trackPageView(token);
           setLoading(false);
           return;
         }
@@ -46,6 +63,7 @@ export function useSession() {
 
       localStorage.setItem("procbse_session_token", token);
       setSession(data as SessionData);
+      trackPageView(token);
     } catch (err) {
       console.error("Session error:", err);
       setError(err instanceof Error ? err.message : "Failed to initialize session");

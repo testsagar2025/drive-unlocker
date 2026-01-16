@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Phone, Mail, Loader2, Sparkles } from "lucide-react";
+import { User, Phone, GraduationCap, Loader2, Sparkles } from "lucide-react";
 
 interface RegistrationFormProps {
   sessionToken: string;
@@ -14,13 +15,13 @@ interface RegistrationFormProps {
 
 export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormProps) {
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [studentClass, setStudentClass] = useState("");
   const [mobile, setMobile] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string; mobile?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; class?: string; mobile?: string }>({});
 
   const validateForm = () => {
-    const newErrors: { name?: string; email?: string; mobile?: string } = {};
+    const newErrors: { name?: string; class?: string; mobile?: string } = {};
     
     if (!name.trim()) {
       newErrors.name = "Name is required";
@@ -30,10 +31,8 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
       newErrors.name = "Name must be less than 100 characters";
     }
 
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      newErrors.email = "Enter a valid email address";
+    if (!studentClass) {
+      newErrors.class = "Please select your class";
     }
 
     if (!mobile.trim()) {
@@ -46,17 +45,6 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
     return Object.keys(newErrors).length === 0;
   };
 
-  const checkMobileExists = async (mobileNumber: string): Promise<boolean> => {
-    const { data, error } = await supabase
-      .from("user_sessions")
-      .select("id")
-      .eq("student_mobile", mobileNumber)
-      .eq("registration_completed", true)
-      .maybeSingle();
-    
-    return !!data && !error;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -64,19 +52,11 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
 
     setLoading(true);
     try {
-      // Check if mobile number already exists
-      const mobileExists = await checkMobileExists(mobile.trim());
-      if (mobileExists) {
-        setErrors({ mobile: "This mobile number is already registered" });
-        setLoading(false);
-        return;
-      }
-
       const { error } = await supabase
         .from("user_sessions")
         .update({
           student_name: name.trim(),
-          student_email: email.trim(),
+          student_class: studentClass,
           student_mobile: mobile.trim(),
           registration_completed: true,
           registration_completed_at: new Date().toISOString(),
@@ -94,6 +74,18 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
       setLoading(false);
     }
   };
+
+  const classes = [
+    "Class 6",
+    "Class 7", 
+    "Class 8",
+    "Class 9",
+    "Class 10",
+    "Class 11 - Science",
+    "Class 11 - Commerce",
+    "Class 12 - Science",
+    "Class 12 - Commerce",
+  ];
 
   return (
     <Card className="border-primary/30 bg-gradient-to-br from-card via-card to-primary/5">
@@ -128,19 +120,23 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
-              <Mail className="h-4 w-4 text-primary" />
-              Email Address
+            <Label htmlFor="class" className="flex items-center gap-2 text-sm font-medium">
+              <GraduationCap className="h-4 w-4 text-primary" />
+              Class
             </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={`bg-background/50 border-border/50 focus:border-primary ${errors.email ? 'border-destructive' : ''}`}
-            />
-            {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+            <Select value={studentClass} onValueChange={setStudentClass}>
+              <SelectTrigger className={`bg-background/50 border-border/50 ${errors.class ? 'border-destructive' : ''}`}>
+                <SelectValue placeholder="Select your class" />
+              </SelectTrigger>
+              <SelectContent>
+                {classes.map((cls) => (
+                  <SelectItem key={cls} value={cls}>
+                    {cls}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.class && <p className="text-xs text-destructive">{errors.class}</p>}
           </div>
 
           <div className="space-y-2">
@@ -158,7 +154,6 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
               maxLength={10}
             />
             {errors.mobile && <p className="text-xs text-destructive">{errors.mobile}</p>}
-            <p className="text-xs text-muted-foreground">One registration per mobile number</p>
           </div>
 
           <Button

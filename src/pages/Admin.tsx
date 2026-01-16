@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Users, 
   Eye, 
@@ -15,14 +16,20 @@ import {
   Shield,
   Loader2,
   RefreshCw,
-  Download
+  Download,
+  MapPin,
+  Globe,
+  Phone,
+  Mail,
+  UserPlus,
+  MessageCircle
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
 interface SessionData {
   id: string;
   student_name: string | null;
-  student_class: string | null;
+  student_email?: string | null;
   student_mobile: string | null;
   registration_completed: boolean;
   step1_verified: boolean;
@@ -33,6 +40,8 @@ interface SessionData {
   step1_verified_at: string | null;
   step2_verified_at: string | null;
   drive_link_accessed_at: string | null;
+  ip_address?: string | null;
+  location?: string | null;
 }
 
 interface Stats {
@@ -43,6 +52,14 @@ interface Stats {
   driveAccessed: number;
 }
 
+interface ActivityItem {
+  id: string;
+  type: 'registration' | 'step1' | 'step2' | 'drive';
+  name: string;
+  mobile: string;
+  timestamp: string;
+}
+
 const ADMIN_PASSWORD = "Admin@2026";
 
 export default function Admin() {
@@ -51,6 +68,7 @@ export default function Admin() {
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<SessionData[]>([]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalViews: 0,
     totalRegistrations: 0,
@@ -80,13 +98,22 @@ export default function Admin() {
   const fetchData = async () => {
     setRefreshing(true);
     try {
-      // Fetch sessions
+      // Fetch only registered sessions
       const { data: sessionsData, error: sessionsError } = await supabase
         .from("user_sessions")
         .select("*")
-        .order("created_at", { ascending: false });
+        .eq("registration_completed", true)
+        .order("registration_completed_at", { ascending: false });
 
       if (sessionsError) throw sessionsError;
+
+      // Map data to include optional fields
+      const typedSessions: SessionData[] = (sessionsData || []).map((s: any) => ({
+        ...s,
+        student_email: s.student_email || null,
+        ip_address: s.ip_address || null,
+        location: s.location || null
+      }));
 
       // Fetch page views count
       const { count: viewsCount, error: viewsError } = await supabase
@@ -95,13 +122,30 @@ export default function Admin() {
 
       if (viewsError) throw viewsError;
 
-      const typedSessions = sessionsData as SessionData[];
       setSessions(typedSessions);
+
+      // Generate activity feed (WhatsApp-style)
+      const activityList: ActivityItem[] = [];
+      typedSessions.forEach(s => {
+        if (s.registration_completed_at) {
+          activityList.push({
+            id: `${s.id}-reg`,
+            type: 'registration',
+            name: s.student_name || 'Unknown',
+            mobile: s.student_mobile || '',
+            timestamp: s.registration_completed_at
+          });
+        }
+      });
+      
+      // Sort by timestamp descending
+      activityList.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setActivities(activityList.slice(0, 50)); // Last 50 activities
 
       // Calculate stats
       setStats({
         totalViews: viewsCount || 0,
-        totalRegistrations: typedSessions.filter(s => s.registration_completed).length,
+        totalRegistrations: typedSessions.length,
         step1Verified: typedSessions.filter(s => s.step1_verified).length,
         step2Verified: typedSessions.filter(s => s.step2_verified).length,
         driveAccessed: typedSessions.filter(s => s.drive_link_accessed).length,
@@ -115,16 +159,18 @@ export default function Admin() {
   };
 
   const exportToCSV = () => {
-    const headers = ["Name", "Class", "Mobile", "Registered", "Step 1", "Step 2", "Drive Accessed", "Created At"];
+    const headers = ["ID", "Name", "Email", "Mobile", "IP Address", "Location", "Step 1", "Step 2", "Drive Accessed", "Registered At"];
     const rows = sessions.map(s => [
+      s.id.slice(0, 8),
       s.student_name || "-",
-      s.student_class || "-",
+      s.student_email || "-",
       s.student_mobile || "-",
-      s.registration_completed ? "Yes" : "No",
+      s.ip_address || "-",
+      s.location || "-",
       s.step1_verified ? "Yes" : "No",
       s.step2_verified ? "Yes" : "No",
       s.drive_link_accessed ? "Yes" : "No",
-      format(new Date(s.created_at), "dd/MM/yyyy HH:mm"),
+      s.registration_completed_at ? format(new Date(s.registration_completed_at), "dd/MM/yyyy HH:mm") : "-",
     ]);
 
     const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
@@ -199,7 +245,10 @@ export default function Admin() {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gradient-gold">PRO CBSE Admin</h1>
+          <div>
+            <h1 className="text-xl font-bold text-gradient-gold">PRO CBSE Admin</h1>
+            <p className="text-xs text-muted-foreground">Made by Aryan Gupta</p>
+          </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={fetchData} disabled={refreshing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
@@ -207,7 +256,7 @@ export default function Admin() {
             </Button>
             <Button variant="outline" size="sm" onClick={exportToCSV}>
               <Download className="h-4 w-4 mr-2" />
-              Export CSV
+              Export
             </Button>
             <Button variant="destructive" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
@@ -217,11 +266,11 @@ export default function Admin() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          <Card className="border-border/50">
-            <CardContent className="pt-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <Card className="border-border/50 bg-gradient-to-br from-blue-500/10 to-blue-600/5">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-500/20">
                   <Eye className="h-5 w-5 text-blue-500" />
@@ -234,154 +283,216 @@ export default function Admin() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50">
-            <CardContent className="pt-6">
+          <Card className="border-border/50 bg-gradient-to-br from-primary/10 to-primary/5">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/20">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.totalRegistrations}</p>
-                  <p className="text-xs text-muted-foreground">Registrations</p>
+                  <p className="text-xs text-muted-foreground">Registered</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50">
-            <CardContent className="pt-6">
+          <Card className="border-border/50 bg-gradient-to-br from-green-500/10 to-green-600/5">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-500/20">
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.step1Verified}</p>
-                  <p className="text-xs text-muted-foreground">Step 1 Done</p>
+                  <p className="text-xs text-muted-foreground">Step 1</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50">
-            <CardContent className="pt-6">
+          <Card className="border-border/50 bg-gradient-to-br from-purple-500/10 to-purple-600/5">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-purple-500/20">
                   <CheckCircle2 className="h-5 w-5 text-purple-500" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.step2Verified}</p>
-                  <p className="text-xs text-muted-foreground">Step 2 Done</p>
+                  <p className="text-xs text-muted-foreground">Step 2</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50">
-            <CardContent className="pt-6">
+          <Card className="border-border/50 bg-gradient-to-br from-amber-500/10 to-amber-600/5">
+            <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-amber-500/20">
                   <Download className="h-5 w-5 text-amber-500" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.driveAccessed}</p>
-                  <p className="text-xs text-muted-foreground">Drive Access</p>
+                  <p className="text-xs text-muted-foreground">Drive</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Students Table */}
-        <Card className="border-border/50">
-          <CardHeader>
-            <CardTitle>Student Details</CardTitle>
-            <CardDescription>
-              All registered students and their verification status
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Registered At</TableHead>
-                    <TableHead>Progress</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sessions.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
-                        No students registered yet
-                      </TableCell>
-                    </TableRow>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* WhatsApp-style Activity Feed */}
+          <Card className="border-border/50 lg:col-span-1">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-green-500" />
+                <CardTitle className="text-lg">Activity Feed</CardTitle>
+              </div>
+              <CardDescription>WhatsApp-style registration updates</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[500px]">
+                <div className="p-4 space-y-3">
+                  {activities.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No activity yet</p>
                   ) : (
-                    sessions.map((session) => (
-                      <TableRow key={session.id}>
-                        <TableCell className="font-medium">
-                          {session.student_name || <span className="text-muted-foreground">-</span>}
-                        </TableCell>
-                        <TableCell>
-                          {session.student_class || <span className="text-muted-foreground">-</span>}
-                        </TableCell>
-                        <TableCell>
-                          {session.student_mobile || <span className="text-muted-foreground">-</span>}
-                        </TableCell>
-                        <TableCell>
-                          {session.registration_completed ? (
-                            <Badge variant="default" className="bg-green-500/20 text-green-500 border-green-500/30">
-                              Registered
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-muted-foreground">
-                              Pending
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {session.registration_completed_at ? (
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {format(new Date(session.registration_completed_at), "dd MMM yyyy, HH:mm")}
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Badge 
-                              variant={session.step1_verified ? "default" : "outline"} 
-                              className={`text-xs ${session.step1_verified ? 'bg-green-500/20 text-green-500' : ''}`}
-                            >
-                              S1
-                            </Badge>
-                            <Badge 
-                              variant={session.step2_verified ? "default" : "outline"} 
-                              className={`text-xs ${session.step2_verified ? 'bg-green-500/20 text-green-500' : ''}`}
-                            >
-                              S2
-                            </Badge>
-                            <Badge 
-                              variant={session.drive_link_accessed ? "default" : "outline"} 
-                              className={`text-xs ${session.drive_link_accessed ? 'bg-primary/20 text-primary' : ''}`}
-                            >
-                              Drive
-                            </Badge>
+                    activities.map((activity) => (
+                      <div 
+                        key={activity.id} 
+                        className="bg-muted/30 rounded-lg p-3 border border-border/50"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-full bg-green-500/20 shrink-0">
+                            <UserPlus className="h-4 w-4 text-green-500" />
                           </div>
-                        </TableCell>
-                      </TableRow>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{activity.name}</p>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              +91 {activity.mobile.slice(0, 5)} {activity.mobile.slice(5)} was added
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     ))
                   )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Students Table */}
+          <Card className="border-border/50 lg:col-span-2">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Registered Students</CardTitle>
+              <CardDescription>
+                {sessions.length} students with IP, location, and contact details
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[500px]">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/30">
+                        <TableHead className="text-xs">ID</TableHead>
+                        <TableHead className="text-xs">Name</TableHead>
+                        <TableHead className="text-xs">Contact</TableHead>
+                        <TableHead className="text-xs">Location</TableHead>
+                        <TableHead className="text-xs">Progress</TableHead>
+                        <TableHead className="text-xs">Registered</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sessions.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                            No registered students yet
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        sessions.map((session) => (
+                          <TableRow key={session.id} className="hover:bg-muted/20">
+                            <TableCell className="text-xs font-mono text-muted-foreground">
+                              {session.id.slice(0, 8)}
+                            </TableCell>
+                            <TableCell>
+                              <span className="font-medium text-sm">{session.student_name || '-'}</span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-1 text-xs">
+                                  <Phone className="h-3 w-3 text-muted-foreground" />
+                                  <span>{session.student_mobile || '-'}</span>
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Mail className="h-3 w-3" />
+                                  <span className="truncate max-w-[120px]">{session.student_email || '-'}</span>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-1 text-xs">
+                                  <Globe className="h-3 w-3 text-muted-foreground" />
+                                  <span className="font-mono">{session.ip_address || '-'}</span>
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <MapPin className="h-3 w-3" />
+                                  <span className="truncate max-w-[100px]">{session.location || '-'}</span>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Badge 
+                                  variant={session.step1_verified ? "default" : "outline"} 
+                                  className={`text-xs px-1.5 ${session.step1_verified ? 'bg-green-500/20 text-green-500 border-green-500/30' : ''}`}
+                                >
+                                  S1
+                                </Badge>
+                                <Badge 
+                                  variant={session.step2_verified ? "default" : "outline"} 
+                                  className={`text-xs px-1.5 ${session.step2_verified ? 'bg-green-500/20 text-green-500 border-green-500/30' : ''}`}
+                                >
+                                  S2
+                                </Badge>
+                                <Badge 
+                                  variant={session.drive_link_accessed ? "default" : "outline"} 
+                                  className={`text-xs px-1.5 ${session.drive_link_accessed ? 'bg-primary/20 text-primary border-primary/30' : ''}`}
+                                >
+                                  D
+                                </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {session.registration_completed_at ? (
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {format(new Date(session.registration_completed_at), "dd MMM, HH:mm")}
+                                </div>
+                              ) : "-"}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            PRO CBSE Admin Panel • Made with ❤️ by <span className="text-primary font-medium">Aryan Gupta</span>
+          </p>
+        </div>
       </main>
     </div>
   );

@@ -18,7 +18,6 @@ export function Step3Card({ isActive, isLocked, sessionToken }: Step3CardProps) 
 
   const handleUnlock = async () => {
     setLoading(true);
-
     try {
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-drive-link`,
@@ -26,18 +25,13 @@ export function Step3Card({ isActive, isLocked, sessionToken }: Step3CardProps) 
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({ sessionToken }),
         }
       );
-
       const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to unlock resources");
-      }
-
+      if (!response.ok) throw new Error(result.error || "Failed to unlock resources");
       setDriveLink(result.driveLink);
       setRevealed(true);
       toast.success("🎉 Resources unlocked successfully!");
@@ -51,7 +45,7 @@ export function Step3Card({ isActive, isLocked, sessionToken }: Step3CardProps) 
 
   return (
     <Card className={cn(
-      "transition-all duration-300",
+      "transition-all duration-300 rounded-2xl border-border/50 shadow-sm",
       isActive && !revealed && "ring-2 ring-primary shadow-gold",
       revealed && "ring-2 ring-[hsl(var(--success))]",
       isLocked && "opacity-40 pointer-events-none"
@@ -60,97 +54,50 @@ export function Step3Card({ isActive, isLocked, sessionToken }: Step3CardProps) 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center",
-              revealed ? "bg-[hsl(var(--success))]" : isLocked ? "bg-muted" : "bg-primary"
+              "w-10 h-10 rounded-xl flex items-center justify-center",
+              revealed ? "bg-[hsl(var(--success))]" : isLocked ? "bg-muted" : "bg-gradient-gold"
             )}>
-              {revealed ? (
-                <CheckCircle className="h-5 w-5 text-[hsl(var(--success-foreground))]" />
-              ) : isLocked ? (
-                <Lock className="h-5 w-5 text-muted-foreground" />
-              ) : (
-                <FolderOpen className="h-5 w-5 text-primary-foreground" />
-              )}
+              {revealed ? <CheckCircle className="h-5 w-5 text-white" /> : isLocked ? <Lock className="h-5 w-5 text-muted-foreground" /> : <FolderOpen className="h-5 w-5 text-white" />}
             </div>
             <div>
               <CardTitle className="text-lg">Step 3: Get Resources</CardTitle>
               <CardDescription>Access your CBSE materials</CardDescription>
             </div>
           </div>
-          {revealed && (
-            <span className="text-xs bg-[hsl(var(--success))]/20 text-[hsl(var(--success))] px-2 py-1 rounded-full">
-              Unlocked ✓
-            </span>
-          )}
-          {isLocked && (
-            <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-              Complete Steps 1 & 2
-            </span>
-          )}
+          {revealed && <span className="text-xs bg-[hsl(var(--success))]/15 text-[hsl(var(--success))] px-3 py-1 rounded-full font-medium">Unlocked ✓</span>}
+          {isLocked && <span className="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full">Complete Steps 1 & 2</span>}
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {isLocked && (
-          <div className="bg-muted/30 rounded-lg p-6 text-center">
+          <div className="bg-muted/30 rounded-xl p-6 text-center">
             <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">
-              Complete both verification steps to unlock exclusive CBSE resources
-            </p>
+            <p className="text-sm text-muted-foreground">Complete both verification steps to unlock</p>
           </div>
         )}
-
         {!isLocked && !revealed && (
           <div className="space-y-4">
-            <div className="bg-gradient-gold/10 border border-primary/30 rounded-lg p-4 text-center">
+            <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center">
               <Sparkles className="h-8 w-8 mx-auto text-primary mb-2" />
-              <p className="text-sm font-medium text-foreground">
-                Congratulations! All steps verified.
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Click below to reveal your exclusive resources
-              </p>
+              <p className="text-sm font-medium">Congratulations! All steps verified.</p>
+              <p className="text-xs text-muted-foreground mt-1">Click below to reveal your exclusive resources</p>
             </div>
-
-            <Button
-              className="w-full bg-gradient-gold hover:opacity-90 text-primary-foreground font-bold text-lg h-12"
-              onClick={handleUnlock}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Unlocking...
-                </>
-              ) : (
-                <>
-                  🔓 Unlock Resources
-                </>
-              )}
+            <Button className="w-full bg-gradient-gold hover:opacity-90 text-white font-bold text-lg h-12 rounded-xl" onClick={handleUnlock} disabled={loading}>
+              {loading ? (<><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Unlocking...</>) : "🔓 Unlock Resources"}
             </Button>
           </div>
         )}
-        
         {revealed && driveLink && (
           <div className="space-y-4">
-            <div className="bg-[hsl(var(--success))]/10 rounded-lg p-4 text-center">
+            <div className="bg-[hsl(var(--success))]/10 rounded-xl p-4 text-center">
               <CheckCircle className="h-10 w-10 mx-auto text-[hsl(var(--success))] mb-2" />
-              <p className="text-lg font-bold text-[hsl(var(--success))]">
-                🎉 Resources Unlocked!
-              </p>
+              <p className="text-lg font-bold text-[hsl(var(--success))]">🎉 Resources Unlocked!</p>
             </div>
-
-            <Button
-              className="w-full bg-[#4285F4] hover:bg-[#3b78e7] text-white font-semibold h-12"
-              onClick={() => window.open(driveLink, "_blank")}
-            >
-              <FolderOpen className="mr-2 h-5 w-5" />
-              Open Google Drive
-              <ExternalLink className="ml-2 h-4 w-4" />
+            <Button className="w-full bg-[#4285F4] hover:bg-[#3b78e7] text-white font-semibold h-12 rounded-xl" onClick={() => window.open(driveLink, "_blank")}>
+              <FolderOpen className="mr-2 h-5 w-5" /> Open Google Drive <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
-
-            <p className="text-xs text-center text-muted-foreground">
-              Bookmark this folder for quick access to all CBSE materials
-            </p>
+            <p className="text-xs text-center text-muted-foreground">Bookmark this folder for quick access</p>
           </div>
         )}
       </CardContent>

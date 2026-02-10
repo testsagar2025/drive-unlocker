@@ -2,32 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* PRO CBSE Dark Theme Design System - All colors in HSL */
-
 @layer base {
   :root {
-    /* Dark theme by default for PRO CBSE */
-    --background: 0 0% 5%;
-    --foreground: 48 100% 96%;
+    /* Light theme - soft purple/warm tones like reference */
+    --background: 270 50% 98%;
+    --foreground: 270 30% 15%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 48 100% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 270 30% 15%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 48 100% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 30% 15%;
 
-    /* Golden/Yellow accent matching PRO CBSE branding */
-    --primary: 45 100% 50%;
-    --primary-foreground: 0 0% 5%;
+    /* Purple/orange gradient accent */
+    --primary: 270 80% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 48 100% 96%;
+    --secondary: 270 20% 94%;
+    --secondary-foreground: 270 30% 25%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 270 15% 93%;
+    --muted-foreground: 270 10% 45%;
 
-    --accent: 45 100% 50%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 25 95% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -35,50 +33,48 @@
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 45 100% 50%;
+    --border: 270 15% 90%;
+    --input: 270 15% 90%;
+    --ring: 270 80% 60%;
 
     --radius: 0.75rem;
 
-    /* Step status colors */
-    --step-locked: 0 0% 30%;
-    --step-active: 45 100% 50%;
+    --step-locked: 270 10% 75%;
+    --step-active: 270 80% 60%;
     --step-verified: 142 76% 36%;
-
-    /* Gradient for premium feel */
-    --gradient-gold: linear-gradient(135deg, hsl(45, 100%, 50%) 0%, hsl(35, 100%, 45%) 100%);
-    --gradient-dark: linear-gradient(180deg, hsl(0, 0%, 8%) 0%, hsl(0, 0%, 3%) 100%);
   }
 
   .dark {
-    --background: 0 0% 5%;
-    --foreground: 48 100% 96%;
+    --background: 270 25% 6%;
+    --foreground: 270 10% 92%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 48 100% 96%;
+    --card: 270 20% 10%;
+    --card-foreground: 270 10% 92%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 48 100% 96%;
+    --popover: 270 20% 10%;
+    --popover-foreground: 270 10% 92%;
 
-    --primary: 45 100% 50%;
-    --primary-foreground: 0 0% 5%;
+    --primary: 270 80% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 48 100% 96%;
+    --secondary: 270 15% 15%;
+    --secondary-foreground: 270 10% 85%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 270 15% 15%;
+    --muted-foreground: 270 10% 55%;
 
-    --accent: 45 100% 50%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 25 95% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 45 100% 50%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 270 15% 18%;
+    --input: 270 15% 15%;
+    --ring: 270 80% 60%;
   }
 }
 
@@ -95,21 +91,29 @@
 
 @layer utilities {
   .text-gradient-gold {
-    background: linear-gradient(135deg, hsl(45, 100%, 50%) 0%, hsl(35, 100%, 45%) 100%);
+    background: linear-gradient(135deg, hsl(270, 80%, 60%) 0%, hsl(25, 95%, 55%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .bg-gradient-gold {
-    background: linear-gradient(135deg, hsl(45, 100%, 50%) 0%, hsl(35, 100%, 45%) 100%);
+    background: linear-gradient(135deg, hsl(270, 80%, 60%) 0%, hsl(25, 95%, 55%) 100%);
   }
 
   .shadow-gold {
-    box-shadow: 0 4px 20px -5px hsl(45 100% 50% / 0.3);
+    box-shadow: 0 4px 20px -5px hsl(270 80% 60% / 0.3);
   }
 
   .glow-gold {
-    box-shadow: 0 0 20px hsl(45 100% 50% / 0.4);
+    box-shadow: 0 0 20px hsl(270 80% 60% / 0.4);
+  }
+
+  .bg-hero-gradient {
+    background: radial-gradient(ellipse at 50% 0%, hsl(270 80% 60% / 0.15) 0%, transparent 60%);
+  }
+
+  .dark .bg-hero-gradient {
+    background: radial-gradient(ellipse at 50% 0%, hsl(270 80% 60% / 0.25) 0%, transparent 60%);
   }
 }

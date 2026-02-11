@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScreenshotUpload } from "./ScreenshotUpload";
-import { CheckCircle, ExternalLink, UserPlus, Maximize2, Minimize2, X, RotateCcw } from "lucide-react";
+import { CheckCircle, ExternalLink, UserPlus, Maximize2, Minimize2, X, RotateCcw, AlertTriangle, IndianRupee } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Step1CardProps {
@@ -43,8 +43,9 @@ export function Step1Card({ isActive, isVerified, sessionToken, onVerified }: St
           <div className="flex-1 overflow-hidden">
             <iframe key={iframeKey} src={AFFILIATE_LINK} className="w-full h-full border-0" sandbox="allow-scripts allow-forms allow-same-origin allow-popups" title="Registration Form" />
           </div>
-          <div className="p-3 border-t border-border bg-card text-center">
-            <p className="text-sm text-muted-foreground">After registration, close this and upload your confirmation screenshot</p>
+          <div className="p-3 border-t border-border bg-card text-center space-y-1">
+            <p className="text-sm font-medium text-amber-600 dark:text-amber-400">⚠️ After OTP verification, a payment page will appear — You do NOT need to pay!</p>
+            <p className="text-xs text-muted-foreground">Take a screenshot of the payment page and upload it for verification</p>
           </div>
         </div>
       )}
@@ -110,15 +111,32 @@ export function Step1Card({ isActive, isVerified, sessionToken, onVerified }: St
                     <Maximize2 className="h-3 w-3" />
                     <span>Click fullscreen for better experience</span>
                   </div>
-                  <div className="bg-muted/30 rounded-xl p-4 space-y-2 border border-border/50">
-                    <p className="text-sm font-medium flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">!</span>
-                      After completing registration:
-                    </p>
-                    <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside pl-7">
-                      <li>Take a screenshot of the success/confirmation page</li>
-                      <li>Upload it below for AI verification</li>
-                    </ol>
+                  <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-xl p-4 space-y-3 border border-amber-500/30">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">Important Instructions:</p>
+                        <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+                          <li>Enter your details & complete <strong>OTP verification</strong></li>
+                          <li>After OTP, a <strong>payment page</strong> will appear</li>
+                          <li className="flex items-start gap-1">
+                            <span>3.</span>
+                            <span className="flex items-center gap-1 flex-wrap">
+                              <IndianRupee className="h-3 w-3 text-emerald-500 inline" />
+                              <strong className="text-emerald-600 dark:text-emerald-400">You do NOT need to pay!</strong> This exam is <strong>FREE</strong>
+                            </span>
+                          </li>
+                          <li>Take a <strong>screenshot of the payment page</strong> and upload below</li>
+                        </ol>
+                      </div>
+                    </div>
+                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-2.5 text-center">
+                      <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                        🎓 No payment required for the examination — it's completely FREE!
+                      </p>
+                    </div>
                   </div>
                   <ScreenshotUpload stepNumber={1} sessionToken={sessionToken} onVerified={onVerified} />
                 </div>

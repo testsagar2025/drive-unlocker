@@ -121,12 +121,8 @@ export function Step1Card({ isActive, isVerified, sessionToken, onVerified }: St
                         <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
                           <li>Enter your details & complete <strong>OTP verification</strong></li>
                           <li>After OTP, a <strong>payment page</strong> will appear</li>
-                          <li className="flex items-start gap-1">
-                            <span>3.</span>
-                            <span className="flex items-center gap-1 flex-wrap">
-                              <IndianRupee className="h-3 w-3 text-emerald-500 inline" />
-                              <strong className="text-emerald-600 dark:text-emerald-400">You do NOT need to pay!</strong> This exam is <strong>FREE</strong>
-                            </span>
+                          <li>
+                            <strong className="text-emerald-600 dark:text-emerald-400">You do NOT need to pay!</strong> This exam is <strong>FREE</strong>
                           </li>
                           <li>Take a <strong>screenshot of the payment page</strong> and upload below</li>
                         </ol>

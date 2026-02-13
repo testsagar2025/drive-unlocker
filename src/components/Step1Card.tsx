@@ -81,7 +81,7 @@ export function Step1Card({ isActive, isVerified, sessionToken, onVerified }: St
             <>
               {!showIframe ? (
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Register on our affiliate platform to get access to exclusive CBSE resources.</p>
+                  <p className="text-sm text-muted-foreground">Register on ALLEN's platform, complete OTP verification, and take a screenshot of the <strong>payment page</strong> that appears — no payment needed!</p>
                   <div className="flex flex-col gap-2">
                     <Button className="w-full bg-gradient-gold hover:opacity-90 text-white font-semibold rounded-xl h-11" onClick={() => setShowIframe(true)}>
                       Open Registration Form <ExternalLink className="ml-2 h-4 w-4" />
@@ -119,12 +119,13 @@ export function Step1Card({ isActive, isVerified, sessionToken, onVerified }: St
                       <div className="space-y-1">
                         <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">Important Instructions:</p>
                         <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
-                          <li>Enter your details & complete <strong>OTP verification</strong></li>
-                          <li>After OTP, a <strong>payment page</strong> will appear</li>
+                          <li>Fill in your details (name, mobile, class) on the ALLEN form</li>
+                          <li>Complete the <strong>OTP verification</strong> sent to your phone</li>
+                          <li>A <strong>payment page (₹99)</strong> will appear with Cards, UPI & Net Banking options</li>
                           <li>
-                            <strong className="text-emerald-600 dark:text-emerald-400">You do NOT need to pay!</strong> This exam is <strong>FREE</strong>
+                            <strong className="text-emerald-600 dark:text-emerald-400">DO NOT PAY!</strong> The exam is <strong>completely FREE</strong>
                           </li>
-                          <li>Take a <strong>screenshot of the payment page</strong> and upload below</li>
+                          <li>Take a <strong>screenshot of this payment page</strong> and upload it below for verification</li>
                         </ol>
                       </div>
                     </div>

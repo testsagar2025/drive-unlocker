@@ -1,20 +1,15 @@
 export function Footer() {
   return (
-    <footer className="border-t border-border/50 mt-auto">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span className="text-gradient-gold font-semibold">PRO CBSE</span>
-            <span>© {new Date().getFullYear()}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <a className="hover:text-foreground transition-colors" href="/admin">Admin</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-            <a href="#" className="hover:text-foreground transition-colors">Disclaimer</a>
-          </div>
+    <footer className="border-t border-border/50 mt-auto py-4">
+      <div className="container mx-auto px-4 flex flex-col items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-3">
+          <span className="font-semibold text-gradient-gold">PRO CBSE</span>
+          <span>© {new Date().getFullYear()}</span>
+          <span className="text-border">•</span>
+          <a href="#" className="hover:text-foreground transition-colors">Terms</a>
         </div>
-        <p className="text-xs text-center mt-4 text-muted-foreground/60">
-          This site contains affiliate links. By completing the verification steps, you agree to our terms.
+        <p className="text-[10px] text-center text-muted-foreground/60">
+          This site contains affiliate links. By completing verification, you agree to our terms.
         </p>
       </div>
     </footer>

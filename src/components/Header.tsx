@@ -8,28 +8,23 @@ export function Header() {
 
   return (
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-xl sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="container mx-auto px-4 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
           <img
             src={proCbseLogo}
             alt="PRO CBSE Logo"
-            className="h-10 w-10 rounded-xl border border-border shadow-sm"
+            className="h-9 w-9 rounded-lg border border-border/50"
           />
-          <div>
-            <h1 className="text-lg font-bold tracking-tight">
-              <span className="text-gradient-gold">PROCBSE</span>
-            </h1>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
-              Verified Resources
-            </p>
-          </div>
+          <span className="text-base font-bold tracking-tight text-gradient-gold">
+            PROCBSE
+          </span>
         </div>
 
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="rounded-full h-9 w-9"
+          className="rounded-full h-8 w-8"
         >
           {theme === "dark" ? (
             <Sun className="h-4 w-4" />

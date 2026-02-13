@@ -3,10 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Phone, GraduationCap, Loader2, Sparkles } from "lucide-react";
+import { User, Phone, GraduationCap, Loader2, ArrowRight } from "lucide-react";
 
 interface RegistrationFormProps {
   sessionToken: string;
@@ -65,56 +64,83 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
   ];
 
   return (
-    <Card className="border-border/50 rounded-2xl shadow-lg bg-card">
-      <CardHeader className="text-center pb-4">
-        <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-gold">
-          <Sparkles className="h-8 w-8 text-white" />
+    <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
+      {/* Top accent bar */}
+      <div className="h-1 bg-gradient-gold" />
+
+      <div className="p-6 md:p-8">
+        <div className="text-center mb-6">
+          <h2 className="text-xl font-bold mb-1">Get Started</h2>
+          <p className="text-sm text-muted-foreground">Enter your details to access free study materials</p>
         </div>
-        <CardTitle className="text-2xl font-bold">
-          Welcome to <span className="text-gradient-gold">PRO CBSE</span>
-        </CardTitle>
-        <CardDescription>Enter your details to access exclusive CBSE study materials</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
-              <User className="h-4 w-4 text-primary" /> Full Name
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="name" className="text-xs font-medium flex items-center gap-1.5">
+              <User className="h-3.5 w-3.5 text-primary" /> Full Name
             </Label>
-            <Input id="name" type="text" placeholder="Enter your full name" value={name} onChange={(e) => setName(e.target.value)}
-              className={`rounded-xl ${errors.name ? "border-destructive" : ""}`} maxLength={100} />
+            <Input
+              id="name"
+              type="text"
+              placeholder="Your full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={`h-11 rounded-xl bg-muted/50 border-border/50 focus:bg-card ${errors.name ? "border-destructive" : ""}`}
+              maxLength={100}
+            />
             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="class" className="flex items-center gap-2 text-sm font-medium">
-              <GraduationCap className="h-4 w-4 text-primary" /> Class
+          <div className="space-y-1.5">
+            <Label htmlFor="class" className="text-xs font-medium flex items-center gap-1.5">
+              <GraduationCap className="h-3.5 w-3.5 text-primary" /> Class
             </Label>
             <Select value={studentClass} onValueChange={setStudentClass}>
-              <SelectTrigger className={`rounded-xl ${errors.class ? "border-destructive" : ""}`}>
+              <SelectTrigger className={`h-11 rounded-xl bg-muted/50 border-border/50 ${errors.class ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="Select your class" />
               </SelectTrigger>
-              <SelectContent>{classes.map((cls) => (<SelectItem key={cls} value={cls}>{cls}</SelectItem>))}</SelectContent>
+              <SelectContent>
+                {classes.map((cls) => (
+                  <SelectItem key={cls} value={cls}>{cls}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
             {errors.class && <p className="text-xs text-destructive">{errors.class}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="mobile" className="flex items-center gap-2 text-sm font-medium">
-              <Phone className="h-4 w-4 text-primary" /> Mobile Number
+          <div className="space-y-1.5">
+            <Label htmlFor="mobile" className="text-xs font-medium flex items-center gap-1.5">
+              <Phone className="h-3.5 w-3.5 text-primary" /> Mobile Number
             </Label>
-            <Input id="mobile" type="tel" placeholder="Enter 10-digit mobile number" value={mobile}
+            <Input
+              id="mobile"
+              type="tel"
+              placeholder="10-digit mobile number"
+              value={mobile}
               onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
-              className={`rounded-xl ${errors.mobile ? "border-destructive" : ""}`} maxLength={10} />
+              className={`h-11 rounded-xl bg-muted/50 border-border/50 focus:bg-card ${errors.mobile ? "border-destructive" : ""}`}
+              maxLength={10}
+            />
             {errors.mobile && <p className="text-xs text-destructive">{errors.mobile}</p>}
           </div>
 
-          <Button type="submit" className="w-full bg-gradient-gold hover:opacity-90 text-white font-semibold py-6 rounded-xl" disabled={loading}>
-            {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>) : (<><Sparkles className="mr-2 h-4 w-4" /> Start Verification</>)}
+          <Button
+            type="submit"
+            className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl mt-2"
+            disabled={loading}
+          >
+            {loading ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
+            ) : (
+              <>Continue <ArrowRight className="ml-2 h-4 w-4" /></>
+            )}
           </Button>
         </form>
-        <p className="text-xs text-muted-foreground text-center mt-4">By continuing, you agree to our Terms of Service and Privacy Policy</p>
-      </CardContent>
-    </Card>
+
+        <p className="text-[11px] text-muted-foreground text-center mt-4">
+          By continuing, you agree to our Terms of Service
+        </p>
+      </div>
+    </div>
   );
 }

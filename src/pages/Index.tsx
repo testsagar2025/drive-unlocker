@@ -51,37 +51,37 @@ const Index = () => {
       <Header />
 
       <main className="flex-1">
-        {/* Hero - compact and clean */}
-        <div className="bg-hero-gradient">
+        {/* Hero */}
+        <div className="bg-hero-gradient border-b border-border/30">
           <motion.div
-            className="container mx-auto px-4 pt-10 pb-6 md:pt-14 md:pb-8 text-center max-w-2xl"
-            initial={{ opacity: 0, y: 15 }}
+            className="container mx-auto px-4 pt-8 pb-5 md:pt-12 md:pb-7 text-center max-w-xl"
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-xs font-semibold mb-5">
-              <BookOpen className="h-3.5 w-3.5" />
-              Free CBSE Study Materials
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/15 rounded-full text-primary text-[11px] font-semibold mb-4 tracking-wide">
+              <BookOpen className="h-3 w-3" />
+              FREE CBSE MATERIALS
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-extrabold mb-3 leading-tight tracking-tight">
-              Get Premium <span className="text-gradient-gold">CBSE Resources</span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-2 leading-snug tracking-tight">
+              Unlock Premium{" "}
+              <span className="text-gradient-gold">Study Resources</span>
             </h1>
-            <p className="text-muted-foreground text-sm md:text-base max-w-md mx-auto">
+            <p className="text-muted-foreground text-xs sm:text-sm max-w-sm mx-auto leading-relaxed">
               {showRegistrationForm
-                ? "Register to unlock curated study materials for free."
-                : "Complete the steps below to unlock your resources."}
+                ? "Register to access curated CBSE notes, papers & more — completely free."
+                : "Complete the steps below to get your resources."}
             </p>
 
-            {/* Trust badges */}
-            <div className="flex flex-wrap justify-center gap-4 mt-6">
+            <div className="flex items-center justify-center gap-5 mt-5">
               {[
-                { icon: Shield, label: "100% Free" },
+                { icon: Shield, label: "Free" },
                 { icon: Users, label: "10K+ Students" },
-                { icon: BookOpen, label: "Quality Content" },
+                { icon: BookOpen, label: "Premium" },
               ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Icon className="h-3.5 w-3.5 text-primary" />
+                <div key={label} className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Icon className="h-3 w-3 text-primary" />
                   <span>{label}</span>
                 </div>
               ))}
@@ -90,7 +90,7 @@ const Index = () => {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 py-6 md:py-8 max-w-lg">
+        <div className="container mx-auto px-4 py-5 md:py-8 max-w-md">
           <AnimatePresence mode="wait">
             {showRegistrationForm ? (
               <motion.div

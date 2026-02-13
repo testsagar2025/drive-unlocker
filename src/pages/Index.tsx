@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { StepProgress } from "@/components/StepProgress";
@@ -6,10 +8,12 @@ import { Step2Card } from "@/components/Step2Card";
 import { Step3Card } from "@/components/Step3Card";
 import { RegistrationForm } from "@/components/RegistrationForm";
 import { useSession } from "@/hooks/useSession";
-import { Loader2, Rocket, Shield, Award, Users } from "lucide-react";
+import { Loader2, Rocket, Shield, Award, Users, Settings, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [showFab, setShowFab] = useState(false);
   const { session, loading, error, refreshSession } = useSession();
 
   if (loading) {
@@ -184,6 +188,33 @@ const Index = () => {
       </main>
 
       <Footer />
+
+      {/* Floating Settings Button */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+        <AnimatePresence>
+          {showFab && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 10 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => navigate("/admin")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border/50 shadow-lg text-sm font-medium text-foreground hover:bg-muted transition-colors backdrop-blur-sm"
+            >
+              <Shield className="h-4 w-4 text-primary" />
+              Admin Panel
+            </motion.button>
+          )}
+        </AnimatePresence>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowFab((prev) => !prev)}
+          className="w-12 h-12 rounded-full bg-gradient-gold shadow-gold flex items-center justify-center text-white"
+        >
+          {showFab ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
+        </motion.button>
+      </div>
     </div>
   );
 };

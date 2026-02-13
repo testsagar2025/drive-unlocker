@@ -7,13 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useTheme } from "@/hooks/useTheme";
 import {
   Users, Eye, CheckCircle2, Clock, LogOut, Shield, Loader2, RefreshCw, Download,
-  Moon, Sun, FolderOpen, TrendingUp, UserCheck, Search
+  Moon, Sun, FolderOpen, TrendingUp, UserCheck, Search, Trash2
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 interface SessionData {
   id: string;
@@ -51,6 +53,8 @@ export default function Admin() {
   const [stats, setStats] = useState<Stats>({ totalViews: 0, totalRegistrations: 0, step1Verified: 0, step2Verified: 0, driveAccessed: 0 });
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +121,43 @@ export default function Admin() {
   useEffect(() => {
     if (isAuthenticated) { setLoading(true); fetchData(); }
   }, [isAuthenticated]);
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("user_sessions")
+        .delete()
+        .in("id", Array.from(selectedIds));
+      if (error) throw error;
+      toast.success(`Deleted ${selectedIds.size} student${selectedIds.size > 1 ? "s" : ""}`);
+      setSelectedIds(new Set());
+      await fetchData();
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Failed to delete students");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredSessions.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredSessions.map((s) => s.id)));
+    }
+  };
 
   // Only show students who actually registered (have name filled in)
   const registeredSessions = useMemo(() => {
@@ -281,14 +322,28 @@ export default function Admin() {
                   <CardTitle>Student Details</CardTitle>
                   <CardDescription>{filteredSessions.length} student{filteredSessions.length !== 1 ? "s" : ""} registered</CardDescription>
                 </div>
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search name, class, mobile..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 rounded-xl"
-                  />
+                <div className="flex items-center gap-2">
+                  {selectedIds.size > 0 && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDeleteSelected}
+                      disabled={deleting}
+                      className="rounded-xl"
+                    >
+                      {deleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                      Delete ({selectedIds.size})
+                    </Button>
+                  )}
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search name, class, mobile..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 rounded-xl"
+                    />
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -297,7 +352,13 @@ export default function Admin() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[50px]">#</TableHead>
+                      <TableHead className="w-[40px]">
+                        <Checkbox
+                          checked={filteredSessions.length > 0 && selectedIds.size === filteredSessions.length}
+                          onCheckedChange={toggleSelectAll}
+                        />
+                      </TableHead>
+                      <TableHead className="w-[40px]">#</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Class</TableHead>
                       <TableHead>Mobile</TableHead>
@@ -310,13 +371,19 @@ export default function Admin() {
                   <TableBody>
                     {filteredSessions.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground py-10">
+                        <TableCell colSpan={9} className="text-center text-muted-foreground py-10">
                           {searchQuery ? "No matching students found" : "No students registered yet"}
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredSessions.map((session, index) => (
-                        <TableRow key={session.id} className="group">
+                        <TableRow key={session.id} className={`group ${selectedIds.has(session.id) ? "bg-primary/5" : ""}`}>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedIds.has(session.id)}
+                              onCheckedChange={() => toggleSelect(session.id)}
+                            />
+                          </TableCell>
                           <TableCell className="text-muted-foreground text-xs">{index + 1}</TableCell>
                           <TableCell className="font-medium">
                             {session.student_name || <span className="text-muted-foreground italic">Unknown</span>}

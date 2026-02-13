@@ -135,14 +135,14 @@ export function ScreenshotUpload({
       {!preview ? (
         <Button
           variant="outline"
-          className="w-full h-24 border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all"
+          className="w-full h-20 sm:h-24 border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all rounded-xl"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || uploading}
         >
-          <div className="flex flex-col items-center gap-2">
-            <Upload className="h-6 w-6 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              Upload Screenshot for Verification
+          <div className="flex flex-col items-center gap-1.5">
+            <Upload className="h-5 w-5 text-muted-foreground" />
+            <span className="text-xs sm:text-sm text-muted-foreground">
+              Upload Screenshot
             </span>
           </div>
         </Button>
@@ -152,7 +152,7 @@ export function ScreenshotUpload({
             <img
               src={preview}
               alt="Screenshot preview"
-              className="w-full h-48 object-cover"
+              className="w-full h-40 sm:h-48 object-cover"
             />
             
             {/* Overlay for status */}

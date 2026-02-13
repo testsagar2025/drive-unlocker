@@ -229,20 +229,23 @@ export default function Admin() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gradient-gold">PRO CBSE Admin</h1>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full h-9 w-9">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2">
+          <h1 className="text-lg sm:text-xl font-bold text-gradient-gold shrink-0">PRO CBSE</h1>
+          <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full h-8 w-8">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Button variant="outline" size="sm" onClick={fetchData} disabled={refreshing} className="rounded-xl">
-              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} /> Refresh
+            <Button variant="outline" size="icon" onClick={fetchData} disabled={refreshing} className="rounded-xl h-8 w-8 sm:h-9 sm:w-auto sm:px-3">
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline ml-2">Refresh</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={exportToCSV} className="rounded-xl">
-              <Download className="h-4 w-4 mr-2" /> Export
+            <Button variant="outline" size="icon" onClick={exportToCSV} className="rounded-xl h-8 w-8 sm:h-9 sm:w-auto sm:px-3">
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline ml-2">Export</span>
             </Button>
-            <Button variant="destructive" size="sm" onClick={handleLogout} className="rounded-xl">
-              <LogOut className="h-4 w-4 mr-2" /> Logout
+            <Button variant="destructive" size="icon" onClick={handleLogout} className="rounded-xl h-8 w-8 sm:h-9 sm:w-auto sm:px-3">
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline ml-2">Logout</span>
             </Button>
           </div>
         </div>

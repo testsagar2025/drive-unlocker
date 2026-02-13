@@ -10,16 +10,17 @@ interface StepProgressProps {
 export function StepProgress({ currentStep, step1Verified, step2Verified }: StepProgressProps) {
   const steps = [
     { number: 1, label: "Register", verified: step1Verified },
-    { number: 2, label: "Join WhatsApp", verified: step2Verified },
-    { number: 3, label: "Get Resources", verified: step1Verified && step2Verified },
+    { number: 2, label: "WhatsApp", verified: step2Verified },
+    { number: 3, label: "Resources", verified: step1Verified && step2Verified },
   ];
 
   return (
-    <div className="w-full max-w-lg mx-auto mb-8">
+    <div className="w-full max-w-sm mx-auto mb-6">
       <div className="flex items-center justify-between relative">
-        <div className="absolute top-5 left-0 right-0 h-0.5 bg-border">
+        {/* Progress line */}
+        <div className="absolute top-4 left-[15%] right-[15%] h-[2px] bg-border">
           <div
-            className="h-full bg-gradient-gold transition-all duration-500"
+            className="h-full bg-primary transition-all duration-500 ease-out"
             style={{ width: step2Verified ? "100%" : step1Verified ? "50%" : "0%" }}
           />
         </div>
@@ -30,21 +31,21 @@ export function StepProgress({ currentStep, step1Verified, step2Verified }: Step
           const isVerified = step.verified;
 
           return (
-            <div key={step.number} className="flex flex-col items-center relative z-10">
+            <div key={step.number} className="flex flex-col items-center relative z-10 w-20">
               <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
-                isVerified && "bg-[hsl(var(--success))] border-[hsl(var(--success))] text-white",
-                isActive && !isVerified && "bg-gradient-gold border-primary text-white glow-gold",
-                isLocked && "bg-muted border-border text-muted-foreground",
-                !isActive && !isVerified && !isLocked && "bg-card border-border text-muted-foreground"
+                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300",
+                isVerified && "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]",
+                isActive && !isVerified && "bg-primary text-primary-foreground ring-4 ring-primary/20",
+                isLocked && "bg-muted text-muted-foreground",
+                !isActive && !isVerified && !isLocked && "bg-card border-2 border-border text-muted-foreground"
               )}>
-                {isVerified ? <Check className="h-5 w-5" /> : isLocked ? <Lock className="h-4 w-4" /> : <span className="font-bold">{step.number}</span>}
+                {isVerified ? <Check className="h-4 w-4" /> : isLocked ? <Lock className="h-3 w-3" /> : step.number}
               </div>
               <span className={cn(
-                "text-xs mt-2 font-medium",
+                "text-[11px] mt-1.5 font-medium",
                 isVerified && "text-[hsl(var(--success))]",
                 isActive && !isVerified && "text-primary",
-                isLocked && "text-muted-foreground/50"
+                (isLocked || (!isActive && !isVerified)) && "text-muted-foreground"
               )}>
                 {step.label}
               </span>

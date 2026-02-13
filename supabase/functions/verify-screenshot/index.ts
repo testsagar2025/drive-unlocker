@@ -28,18 +28,26 @@ serve(async (req) => {
 
     // Define verification prompts for each step
     const verificationPrompts: Record<number, string> = {
-      1: `Analyze this screenshot and determine if it shows a successful registration completion on the ALLEN educational platform or similar affiliate platform.
+      1: `Analyze this screenshot and determine if it shows the ALLEN registration payment page or a registration completion/success screen on the ALLEN educational platform.
 
-Look for these SPECIFIC indicators of successful ALLEN registration:
+Look for ANY of these indicators (payment page OR success page):
+
+PAYMENT PAGE indicators:
+- "Payment Methods" heading visible
+- ALLEN logo with a price amount (e.g., ₹99)
+- Payment options like Cards, UPI, Net Banking
+- Bank logos (SBI, HDFC, ICICI, Axis, etc.)
+- "Add UPI ID" option
+- Any payment gateway interface after ALLEN registration form
+
+SUCCESS/CONFIRMATION indicators:
 - "Thank you for sharing your details" message
-- "Our student advisor will reach out to you" message  
+- "Our student advisor will reach out to you" message
 - Blue checkmark or success icon with celebration graphics
-- ALLEN logo visible with confirmation content
 - "Registration successful" or "Welcome" message
 - Confirmation page showing the user completed signup
-- Any success indicator after form submission
 
-The screenshot should show a SUCCESS/CONFIRMATION screen, NOT the registration form itself.
+The screenshot should show EITHER the payment page OR a success screen, NOT the initial registration form with empty fields.
 
 Respond with ONLY a JSON object (no markdown, no code blocks):
 {"verified": true, "reason": "Description of what you found"} 

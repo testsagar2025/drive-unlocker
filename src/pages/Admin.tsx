@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
 import { useTheme } from "@/hooks/useTheme";
 import {
-  Users, Eye, CheckCircle2, Clock, LogOut, Shield, Loader2, RefreshCw, Download, Moon, Sun
+  Users, Eye, CheckCircle2, Clock, LogOut, Shield, Loader2, RefreshCw, Download,
+  Moon, Sun, FolderOpen, TrendingUp, UserCheck, Search
 } from "lucide-react";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 interface SessionData {
   id: string;
@@ -47,6 +50,7 @@ export default function Admin() {
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [stats, setStats] = useState<Stats>({ totalViews: 0, totalRegistrations: 0, step1Verified: 0, step2Verified: 0, driveAccessed: 0 });
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,31 +118,55 @@ export default function Admin() {
     if (isAuthenticated) { setLoading(true); fetchData(); }
   }, [isAuthenticated]);
 
+  const filteredSessions = useMemo(() => {
+    if (!searchQuery.trim()) return sessions;
+    const q = searchQuery.toLowerCase();
+    return sessions.filter(
+      (s) =>
+        s.student_name?.toLowerCase().includes(q) ||
+        s.student_class?.toLowerCase().includes(q) ||
+        s.student_mobile?.includes(q)
+    );
+  }, [sessions, searchQuery]);
+
+  // Funnel conversion rates
+  const funnelData = useMemo(() => {
+    const total = stats.totalRegistrations || 1;
+    return [
+      { label: "Registered", count: stats.totalRegistrations, pct: 100, icon: Users, color: "bg-primary" },
+      { label: "Step 1 Verified", count: stats.step1Verified, pct: Math.round((stats.step1Verified / total) * 100), icon: CheckCircle2, color: "bg-emerald-500" },
+      { label: "Step 2 Verified", count: stats.step2Verified, pct: Math.round((stats.step2Verified / total) * 100), icon: CheckCircle2, color: "bg-violet-500" },
+      { label: "Drive Unlocked", count: stats.driveAccessed, pct: Math.round((stats.driveAccessed / total) * 100), icon: FolderOpen, color: "bg-accent" },
+    ];
+  }, [stats]);
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-border/50 rounded-2xl shadow-lg">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-gold">
-              <Shield className="h-8 w-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl">Admin Dashboard</CardTitle>
-            <CardDescription>Enter password to access admin panel</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="Enter admin password" value={password}
-                  onChange={(e) => setPassword(e.target.value)} className={`rounded-xl ${passwordError ? "border-destructive" : ""}`} />
-                {passwordError && <p className="text-xs text-destructive">{passwordError}</p>}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <Card className="w-full max-w-md border-border/50 rounded-2xl shadow-lg">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-gold">
+                <Shield className="h-8 w-8 text-primary-foreground" />
               </div>
-              <Button type="submit" className="w-full bg-gradient-gold hover:opacity-90 text-white rounded-xl">
-                <Shield className="mr-2 h-4 w-4" /> Login
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+              <CardTitle className="text-2xl">Admin Dashboard</CardTitle>
+              <CardDescription>Enter password to access admin panel</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" type="password" placeholder="Enter admin password" value={password}
+                    onChange={(e) => setPassword(e.target.value)} className={`rounded-xl ${passwordError ? "border-destructive" : ""}`} />
+                  {passwordError && <p className="text-xs text-destructive">{passwordError}</p>}
+                </div>
+                <Button type="submit" className="w-full bg-gradient-gold hover:opacity-90 text-primary-foreground rounded-xl">
+                  <Shield className="mr-2 h-4 w-4" /> Login
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     );
   }
@@ -151,16 +179,9 @@ export default function Admin() {
     );
   }
 
-  const statCards = [
-    { label: "Total Views", value: stats.totalViews, icon: Eye, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Registrations", value: stats.totalRegistrations, icon: Users, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Step 1 Done", value: stats.step1Verified, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Step 2 Done", value: stats.step2Verified, icon: CheckCircle2, color: "text-violet-500", bg: "bg-violet-500/10" },
-    { label: "Drive Access", value: stats.driveAccessed, icon: Download, color: "text-amber-500", bg: "bg-amber-500/10" },
-  ];
-
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-bold text-gradient-gold">PRO CBSE Admin</h1>
@@ -181,85 +202,172 @@ export default function Admin() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          {statCards.map(({ label, value, icon: Icon, color, bg }) => (
-            <Card key={label} className="border-border/50 rounded-2xl shadow-sm">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-xl ${bg}`}>
-                    <Icon className={`h-5 w-5 ${color}`} />
+      <main className="container mx-auto px-4 py-8 space-y-8">
+        {/* Stat Cards Row */}
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          {[
+            { label: "Total Views", value: stats.totalViews, icon: Eye, gradient: "from-blue-500 to-blue-600" },
+            { label: "Step 1 Verified", value: stats.step1Verified, icon: UserCheck, gradient: "from-emerald-500 to-emerald-600" },
+            { label: "Step 2 Verified", value: stats.step2Verified, icon: CheckCircle2, gradient: "from-violet-500 to-violet-600" },
+            { label: "Drive Unlocked", value: stats.driveAccessed, icon: FolderOpen, gradient: "from-amber-500 to-orange-500" },
+          ].map(({ label, value, icon: Icon, gradient }, i) => (
+            <motion.div key={label} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+              <Card className="border-border/50 rounded-2xl shadow-sm overflow-hidden relative">
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-[0.06]`} />
+                <CardContent className="pt-6 pb-5 relative">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-3xl font-extrabold tracking-tight">{value}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{label}</p>
+                    </div>
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-lg`}>
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold">{value}</p>
-                    <p className="text-xs text-muted-foreground">{label}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <Card className="border-border/50 rounded-2xl shadow-sm">
-          <CardHeader>
-            <CardTitle>Student Details</CardTitle>
-            <CardDescription>All registered students and their verification status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Registered At</TableHead>
-                    <TableHead>Progress</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sessions.length === 0 ? (
+        {/* Funnel Section */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Card className="border-border/50 rounded-2xl shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Conversion Funnel</CardTitle>
+              </div>
+              <CardDescription>Student progress through each step</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-5">
+                {funnelData.map(({ label, count, pct, icon: Icon, color }) => (
+                  <div key={label} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{label}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold">{count}</span>
+                        <Badge variant="outline" className="text-xs">{pct}%</Badge>
+                      </div>
+                    </div>
+                    <Progress value={pct} className="h-2.5 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Student Table */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <Card className="border-border/50 rounded-2xl shadow-sm">
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <CardTitle>Student Details</CardTitle>
+                  <CardDescription>{filteredSessions.length} student{filteredSessions.length !== 1 ? "s" : ""} registered</CardDescription>
+                </div>
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search name, class, mobile..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 rounded-xl"
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-10">No students registered yet</TableCell>
+                      <TableHead className="w-[50px]">#</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Class</TableHead>
+                      <TableHead>Mobile</TableHead>
+                      <TableHead className="text-center">Step 1</TableHead>
+                      <TableHead className="text-center">Step 2</TableHead>
+                      <TableHead className="text-center">Drive</TableHead>
+                      <TableHead>Registered</TableHead>
                     </TableRow>
-                  ) : (
-                    sessions.map((session) => (
-                      <TableRow key={session.id}>
-                        <TableCell className="font-medium">{session.student_name || <span className="text-muted-foreground">-</span>}</TableCell>
-                        <TableCell>{session.student_class || <span className="text-muted-foreground">-</span>}</TableCell>
-                        <TableCell>{session.student_mobile || <span className="text-muted-foreground">-</span>}</TableCell>
-                        <TableCell>
-                          {session.registration_completed ? (
-                            <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/20">Registered</Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-muted-foreground">Pending</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {session.registration_completed_at ? (
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {format(new Date(session.registration_completed_at), "dd MMM yyyy, HH:mm")}
-                            </div>
-                          ) : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Badge variant={session.step1_verified ? "default" : "outline"} className={`text-xs ${session.step1_verified ? "bg-emerald-500/15 text-emerald-500" : ""}`}>S1</Badge>
-                            <Badge variant={session.step2_verified ? "default" : "outline"} className={`text-xs ${session.step2_verified ? "bg-emerald-500/15 text-emerald-500" : ""}`}>S2</Badge>
-                            <Badge variant={session.drive_link_accessed ? "default" : "outline"} className={`text-xs ${session.drive_link_accessed ? "bg-primary/15 text-primary" : ""}`}>Drive</Badge>
-                          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredSessions.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center text-muted-foreground py-10">
+                          {searchQuery ? "No matching students found" : "No students registered yet"}
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                    ) : (
+                      filteredSessions.map((session, index) => (
+                        <TableRow key={session.id} className="group">
+                          <TableCell className="text-muted-foreground text-xs">{index + 1}</TableCell>
+                          <TableCell className="font-medium">
+                            {session.student_name || <span className="text-muted-foreground italic">Unknown</span>}
+                          </TableCell>
+                          <TableCell>
+                            {session.student_class ? (
+                              <Badge variant="secondary" className="text-xs font-normal">{session.student_class}</Badge>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">{session.student_mobile || <span className="text-muted-foreground">-</span>}</TableCell>
+                          <TableCell className="text-center">
+                            <StepBadge done={session.step1_verified} timestamp={session.step1_verified_at} />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <StepBadge done={session.step2_verified} timestamp={session.step2_verified_at} />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <StepBadge done={session.drive_link_accessed} timestamp={session.drive_link_accessed_at} variant="drive" />
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                            {session.created_at ? (
+                              <div className="flex items-center gap-1.5">
+                                <Clock className="h-3 w-3" />
+                                {format(new Date(session.created_at), "dd MMM yy, HH:mm")}
+                              </div>
+                            ) : "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </main>
     </div>
+  );
+}
+
+function StepBadge({ done, timestamp, variant = "step" }: { done: boolean; timestamp: string | null; variant?: "step" | "drive" }) {
+  if (!done) {
+    return <span className="inline-block w-3 h-3 rounded-full bg-muted border border-border" title="Not completed" />;
+  }
+
+  const title = timestamp ? format(new Date(timestamp), "dd MMM yyyy, HH:mm") : "Completed";
+  const colorClass = variant === "drive"
+    ? "bg-accent text-accent-foreground"
+    : "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]";
+
+  return (
+    <span title={title} className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${colorClass}`}>
+      <CheckCircle2 className="h-3.5 w-3.5" />
+    </span>
   );
 }

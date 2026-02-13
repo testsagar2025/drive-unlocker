@@ -41,13 +41,15 @@ interface Stats {
   driveAccessed: number;
 }
 
+const ADMIN_USERNAME = "Admin";
 const ADMIN_PASSWORD = "Admin@2026";
 
 export default function Admin() {
   const { theme, toggleTheme } = useTheme();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [loginError, setLoginError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [stats, setStats] = useState<Stats>({ totalViews: 0, totalRegistrations: 0, step1Verified: 0, step2Verified: 0, driveAccessed: 0 });
@@ -58,18 +60,19 @@ export default function Admin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
-      setPasswordError("");
+      setLoginError("");
       sessionStorage.setItem("procbse_admin_auth", "true");
     } else {
-      setPasswordError("Invalid password");
+      setLoginError("Invalid username or password");
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem("procbse_admin_auth");
+    setUsername("");
     setPassword("");
   };
 
@@ -189,29 +192,54 @@ export default function Admin() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <Card className="w-full max-w-md border-border/50 rounded-2xl shadow-lg">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-gold">
-                <Shield className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <CardTitle className="text-2xl">Admin Dashboard</CardTitle>
-              <CardDescription>Enter password to access admin panel</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" placeholder="Enter admin password" value={password}
-                    onChange={(e) => setPassword(e.target.value)} className={`rounded-xl ${passwordError ? "border-destructive" : ""}`} />
-                  {passwordError && <p className="text-xs text-destructive">{passwordError}</p>}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="w-full max-w-sm">
+          <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+            <div className="h-1 bg-gradient-gold" />
+            <div className="p-6 sm:p-8">
+              <div className="text-center mb-6">
+                <div className="mx-auto mb-3 w-14 h-14 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold">
+                  <Shield className="h-7 w-7 text-primary-foreground" />
                 </div>
-                <Button type="submit" className="w-full bg-gradient-gold hover:opacity-90 text-primary-foreground rounded-xl">
-                  <Shield className="mr-2 h-4 w-4" /> Login
+                <h1 className="text-xl font-bold">Admin Login</h1>
+                <p className="text-xs text-muted-foreground mt-1">Sign in to access the dashboard</p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="username" className="text-xs font-medium">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Enter username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="h-11 rounded-xl bg-muted/50 border-border/50 focus:bg-card"
+                    autoComplete="username"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-xs font-medium">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-11 rounded-xl bg-muted/50 border-border/50 focus:bg-card"
+                    autoComplete="current-password"
+                  />
+                </div>
+
+                {loginError && (
+                  <p className="text-xs text-destructive text-center bg-destructive/10 rounded-lg py-2">{loginError}</p>
+                )}
+
+                <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl">
+                  <Shield className="mr-2 h-4 w-4" /> Sign In
                 </Button>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
       </div>
     );

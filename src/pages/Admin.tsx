@@ -118,16 +118,21 @@ export default function Admin() {
     if (isAuthenticated) { setLoading(true); fetchData(); }
   }, [isAuthenticated]);
 
+  // Only show students who actually registered (have name filled in)
+  const registeredSessions = useMemo(() => {
+    return sessions.filter((s) => s.registration_completed && s.student_name);
+  }, [sessions]);
+
   const filteredSessions = useMemo(() => {
-    if (!searchQuery.trim()) return sessions;
+    if (!searchQuery.trim()) return registeredSessions;
     const q = searchQuery.toLowerCase();
-    return sessions.filter(
+    return registeredSessions.filter(
       (s) =>
         s.student_name?.toLowerCase().includes(q) ||
         s.student_class?.toLowerCase().includes(q) ||
         s.student_mobile?.includes(q)
     );
-  }, [sessions, searchQuery]);
+  }, [registeredSessions, searchQuery]);
 
   // Funnel conversion rates
   const funnelData = useMemo(() => {

@@ -68,15 +68,15 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
       {/* Top accent bar */}
       <div className="h-1 bg-gradient-gold" />
 
-      <div className="p-6 md:p-8">
-        <div className="text-center mb-6">
-          <h2 className="text-xl font-bold mb-1">Get Started</h2>
-          <p className="text-sm text-muted-foreground">Enter your details to access free study materials</p>
+      <div className="p-4 sm:p-6 md:p-8">
+        <div className="text-center mb-5 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-1">Get Started</h2>
+          <p className="text-[11px] sm:text-sm text-muted-foreground">Enter your details to access free study materials</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name" className="text-xs font-medium flex items-center gap-1.5">
+            <Label htmlFor="name" className="text-[11px] sm:text-xs font-medium flex items-center gap-1.5">
               <User className="h-3.5 w-3.5 text-primary" /> Full Name
             </Label>
             <Input
@@ -85,18 +85,18 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
               placeholder="Your full name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={`h-11 rounded-xl bg-muted/50 border-border/50 focus:bg-card ${errors.name ? "border-destructive" : ""}`}
+              className={`h-10 sm:h-11 rounded-xl bg-muted/50 border-border/50 focus:bg-card text-sm ${errors.name ? "border-destructive" : ""}`}
               maxLength={100}
             />
-            {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+            {errors.name && <p className="text-[10px] sm:text-xs text-destructive">{errors.name}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="class" className="text-xs font-medium flex items-center gap-1.5">
+            <Label htmlFor="class" className="text-[11px] sm:text-xs font-medium flex items-center gap-1.5">
               <GraduationCap className="h-3.5 w-3.5 text-primary" /> Class
             </Label>
             <Select value={studentClass} onValueChange={setStudentClass}>
-              <SelectTrigger className={`h-11 rounded-xl bg-muted/50 border-border/50 ${errors.class ? "border-destructive" : ""}`}>
+              <SelectTrigger className={`h-10 sm:h-11 rounded-xl bg-muted/50 border-border/50 text-sm ${errors.class ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="Select your class" />
               </SelectTrigger>
               <SelectContent>
@@ -105,11 +105,11 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
                 ))}
               </SelectContent>
             </Select>
-            {errors.class && <p className="text-xs text-destructive">{errors.class}</p>}
+            {errors.class && <p className="text-[10px] sm:text-xs text-destructive">{errors.class}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="mobile" className="text-xs font-medium flex items-center gap-1.5">
+            <Label htmlFor="mobile" className="text-[11px] sm:text-xs font-medium flex items-center gap-1.5">
               <Phone className="h-3.5 w-3.5 text-primary" /> Mobile Number
             </Label>
             <Input
@@ -118,15 +118,15 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
               placeholder="10-digit mobile number"
               value={mobile}
               onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))}
-              className={`h-11 rounded-xl bg-muted/50 border-border/50 focus:bg-card ${errors.mobile ? "border-destructive" : ""}`}
+              className={`h-10 sm:h-11 rounded-xl bg-muted/50 border-border/50 focus:bg-card text-sm ${errors.mobile ? "border-destructive" : ""}`}
               maxLength={10}
             />
-            {errors.mobile && <p className="text-xs text-destructive">{errors.mobile}</p>}
+            {errors.mobile && <p className="text-[10px] sm:text-xs text-destructive">{errors.mobile}</p>}
           </div>
 
           <Button
             type="submit"
-            className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl mt-2"
+            className="w-full h-11 sm:h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl mt-1 sm:mt-2 text-sm"
             disabled={loading}
           >
             {loading ? (
@@ -137,7 +137,7 @@ export function RegistrationForm({ sessionToken, onComplete }: RegistrationFormP
           </Button>
         </form>
 
-        <p className="text-[11px] text-muted-foreground text-center mt-4">
+        <p className="text-[10px] sm:text-[11px] text-muted-foreground text-center mt-3 sm:mt-4">
           By continuing, you agree to our Terms of Service
         </p>
       </div>

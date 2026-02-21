@@ -191,7 +191,7 @@ export default function Admin() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center p-3 sm:p-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="w-full max-w-sm">
           <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
             <div className="h-1 bg-gradient-gold" />
@@ -254,11 +254,11 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100dvh] bg-background">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2">
-          <h1 className="text-lg sm:text-xl font-bold text-gradient-gold shrink-0">PRO CBSE</h1>
+        <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
+          <h1 className="text-base sm:text-lg md:text-xl font-bold text-gradient-gold shrink-0">PRO CBSE</h1>
           <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full h-8 w-8">
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -279,10 +279,10 @@ export default function Admin() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 space-y-8">
+      <main className="container mx-auto px-3 sm:px-4 py-5 sm:py-8 space-y-5 sm:space-y-8">
         {/* Stat Cards Row */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -299,7 +299,7 @@ export default function Admin() {
                 <CardContent className="pt-6 pb-5 relative">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-3xl font-extrabold tracking-tight">{value}</p>
+                      <p className="text-2xl sm:text-3xl font-extrabold tracking-tight">{value}</p>
                       <p className="text-xs text-muted-foreground mt-1">{label}</p>
                     </div>
                     <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-lg`}>

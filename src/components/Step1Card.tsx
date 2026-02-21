@@ -27,25 +27,25 @@ export function Step1Card({ isActive, isVerified, sessionToken, onVerified }: St
       {/* Fullscreen iframe overlay */}
       {isFullscreen && showIframe && (
         <div className="fixed inset-0 z-50 bg-background flex flex-col">
-          <div className="flex items-center justify-between p-3 border-b border-border bg-card">
+          <div className="flex items-center justify-between p-2 sm:p-3 border-b border-border bg-card safe-top">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center">
                 <UserPlus className="h-3.5 w-3.5 text-primary-foreground" />
               </div>
-              <span className="text-sm font-semibold">ALLEN Registration</span>
+              <span className="text-xs sm:text-sm font-semibold truncate">ALLEN Registration</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-7 w-7"><RotateCcw className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" onClick={() => window.open(AFFILIATE_LINK, "_blank")} className="h-7 w-7"><ExternalLink className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(false)} className="h-7 w-7"><Minimize2 className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" onClick={handleClose} className="h-7 w-7 hover:bg-destructive/20"><X className="h-3.5 w-3.5" /></Button>
+            <div className="flex items-center gap-0.5 sm:gap-1">
+              <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-8 w-8"><RotateCcw className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => window.open(AFFILIATE_LINK, "_blank")} className="h-8 w-8"><ExternalLink className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(false)} className="h-8 w-8"><Minimize2 className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8 hover:bg-destructive/20"><X className="h-3.5 w-3.5" /></Button>
             </div>
           </div>
           <div className="flex-1 overflow-hidden">
             <iframe key={iframeKey} src={AFFILIATE_LINK} className="w-full h-full border-0" sandbox="allow-scripts allow-forms allow-same-origin allow-popups" title="Registration Form" />
           </div>
-          <div className="p-2.5 border-t border-border bg-accent/10 text-center">
-            <p className="text-xs font-medium text-accent">⚠️ Screenshot the payment page — DO NOT PAY. It's FREE!</p>
+          <div className="p-2 sm:p-2.5 border-t border-border bg-accent/10 text-center safe-bottom">
+            <p className="text-[10px] sm:text-xs font-medium text-accent">⚠️ Screenshot the payment page — DO NOT PAY. It's FREE!</p>
           </div>
         </div>
       )}
@@ -60,70 +60,70 @@ export function Step1Card({ isActive, isVerified, sessionToken, onVerified }: St
         {/* Header - clickable */}
         <button
           onClick={() => !isVerified && setExpanded((p) => !p)}
-          className="w-full flex items-center justify-between p-4 text-left"
+          className="w-full flex items-center justify-between p-3 sm:p-4 text-left"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <div className={cn(
-              "w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0",
+              "w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shrink-0",
               isVerified ? "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" : "bg-primary text-primary-foreground"
             )}>
               {isVerified ? <CheckCircle className="h-4 w-4" /> : "1"}
             </div>
-            <div>
-              <p className="text-sm font-semibold">Register on ALLEN</p>
-              <p className="text-xs text-muted-foreground">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm font-semibold">Register on ALLEN</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                 {isVerified ? "Completed ✓" : "Complete OTP & screenshot payment page"}
               </p>
             </div>
           </div>
           {!isVerified && (
-            expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
           )}
         </button>
 
         {/* Body */}
         {!isVerified && expanded && (
-          <div className="px-4 pb-4 space-y-3">
+          <div className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2.5 sm:space-y-3">
             {!showIframe ? (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <Button
-                  className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl text-sm"
+                  className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl text-xs sm:text-sm"
                   onClick={() => setShowIframe(true)}
                 >
                   Open Registration Form <ExternalLink className="ml-2 h-3.5 w-3.5" />
                 </Button>
                 <button
                   onClick={() => window.open(AFFILIATE_LINK, "_blank")}
-                  className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="w-full text-[10px] sm:text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
                 >
                   Open in new tab ↗
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5 sm:space-y-3">
                 {/* Embedded iframe */}
                 <div className="rounded-lg overflow-hidden border border-border/50">
-                  <div className="flex items-center justify-between px-3 py-1.5 bg-muted/50 border-b border-border/50">
-                    <span className="text-xs font-medium text-muted-foreground">ALLEN Portal</span>
+                  <div className="flex items-center justify-between px-2.5 sm:px-3 py-1.5 bg-muted/50 border-b border-border/50">
+                    <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">ALLEN Portal</span>
                     <div className="flex items-center gap-0.5">
-                      <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-6 w-6"><RotateCcw className="h-3 w-3" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => window.open(AFFILIATE_LINK, "_blank")} className="h-6 w-6"><ExternalLink className="h-3 w-3" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(true)} className="h-6 w-6"><Maximize2 className="h-3 w-3" /></Button>
-                      <Button variant="ghost" size="icon" onClick={handleClose} className="h-6 w-6"><X className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-7 w-7"><RotateCcw className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => window.open(AFFILIATE_LINK, "_blank")} className="h-7 w-7"><ExternalLink className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(true)} className="h-7 w-7"><Maximize2 className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" onClick={handleClose} className="h-7 w-7"><X className="h-3 w-3" /></Button>
                     </div>
                   </div>
-                  <div className="overflow-auto" style={{ height: "420px" }}>
-                    <iframe key={iframeKey} src={AFFILIATE_LINK} className="w-full border-0" style={{ height: "100%", minHeight: "420px" }} sandbox="allow-scripts allow-forms allow-same-origin allow-popups" title="Registration Form" />
+                  <div className="overflow-auto" style={{ height: "min(420px, 55dvh)" }}>
+                    <iframe key={iframeKey} src={AFFILIATE_LINK} className="w-full border-0 h-full" style={{ minHeight: "420px" }} sandbox="allow-scripts allow-forms allow-same-origin allow-popups" title="Registration Form" />
                   </div>
                 </div>
 
                 {/* Instructions */}
-                <div className="bg-accent/8 border border-accent/20 rounded-lg p-3 space-y-2">
+                <div className="bg-accent/8 border border-accent/20 rounded-lg p-2.5 sm:p-3 space-y-1.5 sm:space-y-2">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 text-accent shrink-0" />
-                    <p className="text-xs font-semibold text-accent">Important</p>
+                    <p className="text-[10px] sm:text-xs font-semibold text-accent">Important</p>
                   </div>
-                  <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside ml-5">
+                  <ol className="text-[10px] sm:text-xs text-muted-foreground space-y-0.5 sm:space-y-1 list-decimal list-inside ml-4 sm:ml-5">
                     <li>Fill details & complete <strong>OTP verification</strong></li>
                     <li>A <strong>payment page (₹99)</strong> will appear</li>
                     <li><strong className="text-[hsl(var(--success))]">DO NOT PAY</strong> — it's completely free!</li>

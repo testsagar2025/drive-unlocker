@@ -18,7 +18,7 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-background">
         <div className="text-center space-y-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
           <p className="text-sm text-muted-foreground">Loading...</p>
@@ -29,7 +29,7 @@ const Index = () => {
 
   if (error || !session) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
         <div className="text-center">
           <p className="text-destructive font-medium">Failed to initialize session</p>
           <p className="text-muted-foreground text-sm mt-2">{error}</p>
@@ -47,40 +47,40 @@ const Index = () => {
   if (step1Verified && step2Verified) currentStep = 3;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-[100dvh] bg-background">
       <Header />
 
       <main className="flex-1">
         {/* Hero */}
         <div className="bg-hero-gradient border-b border-border/30">
           <motion.div
-            className="container mx-auto px-4 pt-8 pb-5 md:pt-12 md:pb-7 text-center max-w-xl"
+            className="container mx-auto px-3 sm:px-4 pt-6 pb-4 sm:pt-8 sm:pb-5 md:pt-12 md:pb-7 text-center max-w-xl"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/15 rounded-full text-primary text-[11px] font-semibold mb-4 tracking-wide">
+            <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-primary/10 border border-primary/15 rounded-full text-primary text-[10px] sm:text-[11px] font-semibold mb-3 sm:mb-4 tracking-wide">
               <BookOpen className="h-3 w-3" />
               FREE CBSE MATERIALS
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-2 leading-snug tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-1.5 sm:mb-2 leading-snug tracking-tight">
               Unlock Premium{" "}
               <span className="text-gradient-gold">Study Resources</span>
             </h1>
-            <p className="text-muted-foreground text-xs sm:text-sm max-w-sm mx-auto leading-relaxed">
+            <p className="text-muted-foreground text-[11px] sm:text-xs md:text-sm max-w-xs sm:max-w-sm mx-auto leading-relaxed">
               {showRegistrationForm
                 ? "Register to access curated CBSE notes, papers & more — completely free."
                 : "Complete the steps below to get your resources."}
             </p>
 
-            <div className="flex items-center justify-center gap-5 mt-5">
+            <div className="flex items-center justify-center gap-4 sm:gap-5 mt-4 sm:mt-5">
               {[
                 { icon: Shield, label: "Free" },
                 { icon: Users, label: "10K+ Students" },
                 { icon: BookOpen, label: "Premium" },
               ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <div key={label} className="flex items-center gap-1 text-[10px] sm:text-[11px] text-muted-foreground">
                   <Icon className="h-3 w-3 text-primary" />
                   <span>{label}</span>
                 </div>
@@ -90,7 +90,7 @@ const Index = () => {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 py-5 md:py-8 max-w-md">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-5 md:py-8 max-w-md">
           <AnimatePresence mode="wait">
             {showRegistrationForm ? (
               <motion.div
@@ -112,7 +112,7 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
-                className="space-y-5"
+                className="space-y-4 sm:space-y-5"
               >
                 <StepProgress
                   currentStep={currentStep}
@@ -120,7 +120,7 @@ const Index = () => {
                   step2Verified={step2Verified}
                 />
 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {[
                     <Step1Card key="s1" isActive={currentStep === 1} isVerified={step1Verified} sessionToken={session.session_token} onVerified={refreshSession} />,
                     <Step2Card key="s2" isActive={currentStep === 2} isVerified={step2Verified} isLocked={!step1Verified} sessionToken={session.session_token} onVerified={refreshSession} />,
@@ -145,7 +145,7 @@ const Index = () => {
       <Footer />
 
       {/* Floating Admin FAB */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
+      <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 flex flex-col items-end gap-2 safe-bottom">
         <AnimatePresence>
           {showFab && (
             <motion.button
@@ -165,7 +165,7 @@ const Index = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowFab((prev) => !prev)}
-          className="w-11 h-11 rounded-full bg-gradient-gold shadow-gold flex items-center justify-center text-primary-foreground"
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-gold shadow-gold flex items-center justify-center text-primary-foreground"
         >
           {showFab ? <X className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
         </motion.button>

@@ -12,7 +12,7 @@ interface Step2CardProps {
   onVerified: () => void;
 }
 
-const WHATSAPP_LINK = "https://chat.whatsapp.com/F37Hcfx6xFIEyHrtE4OLRV";
+const WHATSAPP_LINK = "https://chat.whatsapp.com/LWt6GLsZ2cf5dapQi5k4k1?mode=gi_t";
 
 export function Step2Card({ isActive, isVerified, isLocked, sessionToken, onVerified }: Step2CardProps) {
   const [expanded, setExpanded] = useState(isActive && !isLocked);
@@ -42,7 +42,7 @@ export function Step2Card({ isActive, isVerified, isLocked, sessionToken, onVeri
             {isVerified ? <CheckCircle className="h-4 w-4" /> : isLocked ? <Lock className="h-3.5 w-3.5" /> : "2"}
           </div>
           <div>
-            <p className="text-sm font-semibold">Join WhatsApp Channel</p>
+            <p className="text-sm font-semibold">Join WhatsApp Group</p>
             <p className="text-xs text-muted-foreground">
               {isVerified ? "Completed ✓" : isLocked ? "Complete Step 1 first" : "Join & take a screenshot"}
             </p>
@@ -61,14 +61,14 @@ export function Step2Card({ isActive, isVerified, isLocked, sessionToken, onVeri
             onClick={() => window.open(WHATSAPP_LINK, "_blank")}
           >
             <MessageCircle className="mr-2 h-4 w-4" />
-            Join WhatsApp Channel
+            Join WhatsApp Group
             <ExternalLink className="ml-2 h-3.5 w-3.5" />
           </Button>
 
           <div className="bg-muted/50 rounded-lg p-3 border border-border/50">
-            <p className="text-xs font-medium mb-1">After joining:</p>
+            <p className="text-xs font-medium mb-1">After clicking join:</p>
             <ol className="text-xs text-muted-foreground space-y-0.5 list-decimal list-inside">
-              <li>Take a screenshot inside the group</li>
+              <li>Take a screenshot of the group page (join request, group info, or chat)</li>
               <li>Upload it below for verification</li>
             </ol>
           </div>

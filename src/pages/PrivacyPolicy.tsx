@@ -7,13 +7,13 @@ export default function PrivacyPolicy() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-2xl">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
+      <main className="flex-1 container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-2xl">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground mb-5 sm:mb-6 py-1">
           <ArrowLeft className="h-4 w-4" /> Back to Home
         </Link>
 
-        <h1 className="text-2xl font-bold mb-6">Privacy Policy</h1>
-        <div className="prose prose-sm dark:prose-invert max-w-none space-y-5 text-sm text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl font-bold mb-5 sm:mb-6">Privacy Policy</h1>
+        <div className="prose prose-sm dark:prose-invert max-w-none space-y-4 sm:space-y-5 text-xs sm:text-sm text-muted-foreground">
           <p><strong>Last updated:</strong> February 2026</p>
 
           <section className="space-y-2">

@@ -50,18 +50,18 @@ export function Step3Card({ isActive, isLocked, sessionToken }: Step3CardProps) 
       isLocked && "border-border/50 opacity-40"
     )}>
       {/* Header */}
-      <div className="flex items-center gap-3 p-4">
+      <div className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4">
         <div className={cn(
-          "w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0",
+          "w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shrink-0",
           revealed ? "bg-[hsl(var(--success))] text-[hsl(var(--success-foreground))]" :
           isLocked ? "bg-muted text-muted-foreground" :
           "bg-primary text-primary-foreground"
         )}>
           {revealed ? <CheckCircle className="h-4 w-4" /> : isLocked ? <Lock className="h-3.5 w-3.5" /> : "3"}
         </div>
-        <div>
-          <p className="text-sm font-semibold">Get Resources</p>
-          <p className="text-xs text-muted-foreground">
+        <div className="min-w-0">
+          <p className="text-xs sm:text-sm font-semibold">Get Resources</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
             {revealed ? "Unlocked ✓" : isLocked ? "Complete Steps 1 & 2" : "Tap to unlock your materials"}
           </p>
         </div>
@@ -69,9 +69,9 @@ export function Step3Card({ isActive, isLocked, sessionToken }: Step3CardProps) 
 
       {/* Body */}
       {!isLocked && !revealed && (
-        <div className="px-4 pb-4">
+        <div className="px-3 sm:px-4 pb-3 sm:pb-4">
           <Button
-            className="w-full h-11 bg-gradient-gold hover:opacity-90 text-primary-foreground font-semibold rounded-xl"
+            className="w-full h-10 sm:h-11 bg-gradient-gold hover:opacity-90 text-primary-foreground font-semibold rounded-xl text-xs sm:text-sm"
             onClick={handleUnlock}
             disabled={loading}
           >
@@ -85,18 +85,18 @@ export function Step3Card({ isActive, isLocked, sessionToken }: Step3CardProps) 
       )}
 
       {revealed && driveLink && (
-        <div className="px-4 pb-4 space-y-3">
-          <div className="bg-[hsl(var(--success))]/10 rounded-lg p-4 text-center border border-[hsl(var(--success))]/20">
-            <PartyPopper className="h-8 w-8 mx-auto text-[hsl(var(--success))] mb-2" />
-            <p className="text-sm font-bold text-[hsl(var(--success))]">Resources Unlocked!</p>
+        <div className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2.5 sm:space-y-3">
+          <div className="bg-[hsl(var(--success))]/10 rounded-lg p-3 sm:p-4 text-center border border-[hsl(var(--success))]/20">
+            <PartyPopper className="h-7 w-7 sm:h-8 sm:w-8 mx-auto text-[hsl(var(--success))] mb-2" />
+            <p className="text-xs sm:text-sm font-bold text-[hsl(var(--success))]">Resources Unlocked!</p>
           </div>
           <Button
-            className="w-full h-11 bg-[#4285F4] hover:bg-[#3b78e7] text-white font-semibold rounded-xl"
+            className="w-full h-10 sm:h-11 bg-[#4285F4] hover:bg-[#3b78e7] text-white font-semibold rounded-xl text-xs sm:text-sm"
             onClick={() => window.open(driveLink, "_blank")}
           >
             <FolderOpen className="mr-2 h-4 w-4" /> Open Google Drive <ExternalLink className="ml-2 h-3.5 w-3.5" />
           </Button>
-          <p className="text-[11px] text-center text-muted-foreground">Bookmark this folder for quick access</p>
+          <p className="text-[10px] sm:text-[11px] text-center text-muted-foreground">Bookmark this folder for quick access</p>
         </div>
       )}
     </div>

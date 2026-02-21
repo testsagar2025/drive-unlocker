@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,8 +40,21 @@ interface Stats {
   driveAccessed: number;
 }
 
-const ADMIN_USERNAME = "Admin";
-const ADMIN_PASSWORD = "Admin@2026";
+const ADMIN_API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
+
+async function adminFetch(username: string, password: string, action: string, extra?: Record<string, unknown>) {
+  const response = await fetch(ADMIN_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify({ username, password, action, ...extra }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
 
 export default function Admin() {
   const { theme, toggleTheme } = useTheme();
@@ -57,36 +69,53 @@ export default function Admin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  
+  // Store credentials in memory (never in sessionStorage)
+  const credentialsRef = useRef<{ username: string; password: string } | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    setLoginError("");
+    setLoading(true);
+    try {
+      // Validate credentials server-side by attempting to fetch data
+      const data = await adminFetch(username, password, "fetch");
+      credentialsRef.current = { username, password };
       setIsAuthenticated(true);
-      setLoginError("");
-      sessionStorage.setItem("procbse_admin_auth", "true");
-    } else {
-      setLoginError("Invalid username or password");
+      
+      const typedSessions = data.sessions as SessionData[];
+      setSessions(typedSessions);
+      setStats({
+        totalViews: data.totalViews || 0,
+        totalRegistrations: typedSessions.filter((s) => s.registration_completed).length,
+        step1Verified: typedSessions.filter((s) => s.step1_verified).length,
+        step2Verified: typedSessions.filter((s) => s.step2_verified).length,
+        driveAccessed: typedSessions.filter((s) => s.drive_link_accessed).length,
+      });
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    sessionStorage.removeItem("procbse_admin_auth");
+    credentialsRef.current = null;
     setUsername("");
     setPassword("");
+    setSessions([]);
   };
 
   const fetchData = async () => {
+    if (!credentialsRef.current) return;
     setRefreshing(true);
     try {
-      const { data: sessionsData, error: sessionsError } = await supabase.from("user_sessions").select("*").order("created_at", { ascending: false });
-      if (sessionsError) throw sessionsError;
-      const { count: viewsCount, error: viewsError } = await supabase.from("page_views").select("*", { count: "exact", head: true });
-      if (viewsError) throw viewsError;
-      const typedSessions = sessionsData as SessionData[];
+      const data = await adminFetch(credentialsRef.current.username, credentialsRef.current.password, "fetch");
+      const typedSessions = data.sessions as SessionData[];
       setSessions(typedSessions);
       setStats({
-        totalViews: viewsCount || 0,
+        totalViews: data.totalViews || 0,
         totalRegistrations: typedSessions.filter((s) => s.registration_completed).length,
         step1Verified: typedSessions.filter((s) => s.step1_verified).length,
         step2Verified: typedSessions.filter((s) => s.step2_verified).length,
@@ -94,9 +123,9 @@ export default function Admin() {
       });
     } catch (err) {
       console.error("Error fetching data:", err);
+      toast.error("Failed to refresh data");
     } finally {
       setRefreshing(false);
-      setLoading(false);
     }
   };
 
@@ -117,23 +146,13 @@ export default function Admin() {
     a.click();
   };
 
-  useEffect(() => {
-    if (sessionStorage.getItem("procbse_admin_auth") === "true") setIsAuthenticated(true);
-  }, []);
-
-  useEffect(() => {
-    if (isAuthenticated) { setLoading(true); fetchData(); }
-  }, [isAuthenticated]);
-
   const handleDeleteSelected = async () => {
-    if (selectedIds.size === 0) return;
+    if (selectedIds.size === 0 || !credentialsRef.current) return;
     setDeleting(true);
     try {
-      const { error } = await supabase
-        .from("user_sessions")
-        .delete()
-        .in("id", Array.from(selectedIds));
-      if (error) throw error;
+      await adminFetch(credentialsRef.current.username, credentialsRef.current.password, "delete", {
+        ids: Array.from(selectedIds),
+      });
       toast.success(`Deleted ${selectedIds.size} student${selectedIds.size > 1 ? "s" : ""}`);
       setSelectedIds(new Set());
       await fetchData();
@@ -162,7 +181,6 @@ export default function Admin() {
     }
   };
 
-  // Only show students who actually registered (have name filled in)
   const registeredSessions = useMemo(() => {
     return sessions.filter((s) => s.registration_completed && s.student_name);
   }, [sessions]);
@@ -178,7 +196,6 @@ export default function Admin() {
     );
   }, [registeredSessions, searchQuery]);
 
-  // Funnel conversion rates
   const funnelData = useMemo(() => {
     const total = stats.totalRegistrations || 1;
     return [
@@ -234,8 +251,9 @@ export default function Admin() {
                   <p className="text-xs text-destructive text-center bg-destructive/10 rounded-lg py-2">{loginError}</p>
                 )}
 
-                <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl">
-                  <Shield className="mr-2 h-4 w-4" /> Sign In
+                <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl" disabled={loading}>
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Shield className="mr-2 h-4 w-4" />}
+                  Sign In
                 </Button>
               </form>
             </div>
@@ -247,7 +265,7 @@ export default function Admin() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );

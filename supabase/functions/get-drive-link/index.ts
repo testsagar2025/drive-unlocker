@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // The drive link is stored server-side only - never exposed in frontend code
@@ -17,9 +17,18 @@ serve(async (req) => {
   try {
     const { sessionToken } = await req.json();
 
-    if (!sessionToken) {
+    if (!sessionToken || typeof sessionToken !== "string" || sessionToken.length > 100) {
       return new Response(
-        JSON.stringify({ error: "Session token required" }),
+        JSON.stringify({ error: "Invalid session token" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(sessionToken)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid session token format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -36,11 +45,15 @@ serve(async (req) => {
     // Check if both steps are verified
     const { data: session, error: fetchError } = await supabase
       .from("user_sessions")
-      .select("*")
+      .select("step1_verified, step2_verified")
       .eq("session_token", sessionToken)
-      .single();
+      .maybeSingle();
 
-    if (fetchError || !session) {
+    if (fetchError) {
+      throw new Error("Failed to fetch session");
+    }
+
+    if (!session) {
       return new Response(
         JSON.stringify({ error: "Session not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -78,7 +91,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Get drive link error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "An error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -14,9 +14,41 @@ serve(async (req) => {
   try {
     const { sessionToken, stepNumber, screenshotBase64 } = await req.json();
 
-    if (!sessionToken || !stepNumber || !screenshotBase64) {
+    // Input validation
+    if (!sessionToken || typeof sessionToken !== "string" || sessionToken.length > 100) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
+        JSON.stringify({ error: "Invalid session token" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!stepNumber || (stepNumber !== 1 && stepNumber !== 2)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid step number" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!screenshotBase64 || typeof screenshotBase64 !== "string") {
+      return new Response(
+        JSON.stringify({ error: "Missing screenshot" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate base64 image (max ~10MB base64)
+    if (screenshotBase64.length > 14_000_000) {
+      return new Response(
+        JSON.stringify({ error: "Image too large" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate session token format (UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(sessionToken)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid session token format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -26,65 +58,48 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Define verification prompts for each step
     const verificationPrompts: Record<number, string> = {
       1: `You are verifying that a user has visited the ALLEN educational platform registration/payment page. Be LENIENT and approve if the screenshot is plausibly from the ALLEN website or app.
 
 APPROVE (verified: true) if you see ANY of these:
 - Any page from ALLEN website/app (allen.in, allendigital.in, or ALLEN branding)
-- Payment page showing any amount (₹99, ₹0, etc.) with payment options
-- Registration form with ALLEN logo (even if fields are empty or filled)
+- Payment page showing any amount with payment options
+- Registration form with ALLEN logo
 - OTP verification screen from ALLEN
 - "Thank you", "Registration successful", "Welcome" confirmation page
-- Any payment gateway (Razorpay, Paytm, etc.) triggered from ALLEN
+- Any payment gateway triggered from ALLEN
 - ALLEN course selection or dashboard page
 - Any mobile app screen showing ALLEN branding
-- Any page that mentions ALLEN, ALLEN Digital, or ALLEN Online
 
 REJECT (verified: false) ONLY if:
-- The screenshot is completely unrelated to ALLEN (e.g., a random website, blank screen)
+- The screenshot is completely unrelated to ALLEN
 - The image is too blurry/dark to identify anything
-
-Be generous - if there's any reasonable indication the user visited ALLEN's platform, approve it.
 
 Respond with ONLY a JSON object (no markdown, no code blocks):
 {"verified": true, "reason": "Brief description"} OR {"verified": false, "reason": "Brief reason"}`,
       
-      2: `You are verifying that a user has interacted with a WhatsApp group invitation. Be LENIENT and approve if the screenshot shows any WhatsApp group-related activity.
+      2: `You are verifying that a user has interacted with a WhatsApp group invitation. Be LENIENT.
 
 APPROVE (verified: true) if you see ANY of these:
 - WhatsApp group chat with messages visible
 - WhatsApp group info/details page
-- "Request to join" button or "Request sent" / "Waiting for admin approval" message
+- "Request to join" or "Request sent" / "Waiting for admin approval" message
 - "Join group" button on a WhatsApp invite page
-- WhatsApp group name visible (any group name is fine)
-- "You joined using this group's invite link" system message
+- WhatsApp group name visible
 - Any WhatsApp interface showing group membership or invitation
-- Group invite link preview in WhatsApp
-- Screenshot showing a WhatsApp group with member names/messages
-- "Cancel request" button (means they already requested to join)
-- Any WhatsApp group-related screen
+- "Cancel request" button
 
 REJECT (verified: false) ONLY if:
 - The screenshot is completely unrelated to WhatsApp
 - The image is too blurry/dark to identify anything
 - It shows a private chat, not a group
 
-Be generous - any indication of WhatsApp group interaction should be approved.
-
 Respond with ONLY a JSON object (no markdown, no code blocks):
 {"verified": true, "reason": "Brief description"} OR {"verified": false, "reason": "Brief reason"}`
     };
 
     const prompt = verificationPrompts[stepNumber];
-    if (!prompt) {
-      return new Response(
-        JSON.stringify({ error: "Invalid step number" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
 
-    // Call Lovable AI to analyze the screenshot
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -125,20 +140,15 @@ Respond with ONLY a JSON object (no markdown, no code blocks):
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const errorText = await aiResponse.text();
-      console.error("AI Gateway error:", aiResponse.status, errorText);
+      console.error("AI Gateway error:", aiResponse.status);
       throw new Error("AI analysis failed");
     }
 
     const aiData = await aiResponse.json();
     const aiContent = aiData.choices?.[0]?.message?.content || "";
-    
-    console.log("AI Response:", aiContent);
 
-    // Parse the AI response
     let verificationResult;
     try {
-      // Try to extract JSON from the response
       const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         verificationResult = JSON.parse(jsonMatch[0]);
@@ -146,11 +156,10 @@ Respond with ONLY a JSON object (no markdown, no code blocks):
         throw new Error("No JSON found in response");
       }
     } catch (e) {
-      console.error("Failed to parse AI response:", e, aiContent);
+      console.error("Failed to parse AI response:", e);
       verificationResult = { verified: false, reason: "Could not parse AI response" };
     }
 
-    // If verified, update the database
     if (verificationResult.verified) {
       const supabaseUrl = Deno.env.get("SUPABASE_URL");
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -165,11 +174,9 @@ Respond with ONLY a JSON object (no markdown, no code blocks):
       if (stepNumber === 1) {
         updateData.step1_verified = true;
         updateData.step1_verified_at = new Date().toISOString();
-        updateData.step1_screenshot_url = `screenshot_step1_${sessionToken}`;
       } else if (stepNumber === 2) {
         updateData.step2_verified = true;
         updateData.step2_verified_at = new Date().toISOString();
-        updateData.step2_screenshot_url = `screenshot_step2_${sessionToken}`;
       }
 
       const { error: updateError } = await supabase
@@ -195,7 +202,7 @@ Respond with ONLY a JSON object (no markdown, no code blocks):
   } catch (error) {
     console.error("Verification error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "An error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

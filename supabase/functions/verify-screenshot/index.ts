@@ -28,48 +28,52 @@ serve(async (req) => {
 
     // Define verification prompts for each step
     const verificationPrompts: Record<number, string> = {
-      1: `Analyze this screenshot and determine if it shows the ALLEN registration payment page or a registration completion/success screen on the ALLEN educational platform.
+      1: `You are verifying that a user has visited the ALLEN educational platform registration/payment page. Be LENIENT and approve if the screenshot is plausibly from the ALLEN website or app.
 
-Look for ANY of these indicators (payment page OR success page):
+APPROVE (verified: true) if you see ANY of these:
+- Any page from ALLEN website/app (allen.in, allendigital.in, or ALLEN branding)
+- Payment page showing any amount (₹99, ₹0, etc.) with payment options
+- Registration form with ALLEN logo (even if fields are empty or filled)
+- OTP verification screen from ALLEN
+- "Thank you", "Registration successful", "Welcome" confirmation page
+- Any payment gateway (Razorpay, Paytm, etc.) triggered from ALLEN
+- ALLEN course selection or dashboard page
+- Any mobile app screen showing ALLEN branding
+- Any page that mentions ALLEN, ALLEN Digital, or ALLEN Online
 
-PAYMENT PAGE indicators:
-- "Payment Methods" heading visible
-- ALLEN logo with a price amount (e.g., ₹99)
-- Payment options like Cards, UPI, Net Banking
-- Bank logos (SBI, HDFC, ICICI, Axis, etc.)
-- "Add UPI ID" option
-- Any payment gateway interface after ALLEN registration form
+REJECT (verified: false) ONLY if:
+- The screenshot is completely unrelated to ALLEN (e.g., a random website, blank screen)
+- The image is too blurry/dark to identify anything
 
-SUCCESS/CONFIRMATION indicators:
-- "Thank you for sharing your details" message
-- "Our student advisor will reach out to you" message
-- Blue checkmark or success icon with celebration graphics
-- "Registration successful" or "Welcome" message
-- Confirmation page showing the user completed signup
-
-The screenshot should show EITHER the payment page OR a success screen, NOT the initial registration form with empty fields.
+Be generous - if there's any reasonable indication the user visited ALLEN's platform, approve it.
 
 Respond with ONLY a JSON object (no markdown, no code blocks):
-{"verified": true, "reason": "Description of what you found"} 
-OR
-{"verified": false, "reason": "Why verification failed"}`,
+{"verified": true, "reason": "Brief description"} OR {"verified": false, "reason": "Brief reason"}`,
       
-      2: `Analyze this screenshot and determine if it shows the user has successfully joined a WhatsApp group or channel.
+      2: `You are verifying that a user has interacted with a WhatsApp group invitation. Be LENIENT and approve if the screenshot shows any WhatsApp group-related activity.
 
-Look for these indicators:
-- WhatsApp group chat interface visible
-- Group name visible in the chat header
+APPROVE (verified: true) if you see ANY of these:
+- WhatsApp group chat with messages visible
+- WhatsApp group info/details page
+- "Request to join" button or "Request sent" / "Waiting for admin approval" message
+- "Join group" button on a WhatsApp invite page
+- WhatsApp group name visible (any group name is fine)
 - "You joined using this group's invite link" system message
-- Being inside a group chat (not just the invite/join page)
-- Messages from other group members visible
-- Group info showing membership status
+- Any WhatsApp interface showing group membership or invitation
+- Group invite link preview in WhatsApp
+- Screenshot showing a WhatsApp group with member names/messages
+- "Cancel request" button (means they already requested to join)
+- Any WhatsApp group-related screen
 
-The screenshot must show the user is INSIDE the group, not on the join invitation page.
+REJECT (verified: false) ONLY if:
+- The screenshot is completely unrelated to WhatsApp
+- The image is too blurry/dark to identify anything
+- It shows a private chat, not a group
+
+Be generous - any indication of WhatsApp group interaction should be approved.
 
 Respond with ONLY a JSON object (no markdown, no code blocks):
-{"verified": true, "reason": "Description of what you found"}
-OR
-{"verified": false, "reason": "Why verification failed"}`
+{"verified": true, "reason": "Brief description"} OR {"verified": false, "reason": "Brief reason"}`
     };
 
     const prompt = verificationPrompts[stepNumber];
